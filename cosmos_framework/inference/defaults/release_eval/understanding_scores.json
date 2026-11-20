@@ -1,0 +1,236 @@
+[
+  {
+    "name": "BlinkDepth",
+    "phase": "standard",
+    "runner": "blink",
+    "metric": "subtask/Relative_Depth/accuracy",
+    "scale": 100,
+    "reference": 89.51612903225806,
+    "count": 124
+  },
+  {
+    "name": "BlinkSpatial",
+    "phase": "standard",
+    "runner": "blink",
+    "metric": "subtask/Spatial_Relation/accuracy",
+    "scale": 100,
+    "reference": 79.02097902097903,
+    "count": 143
+  },
+  {
+    "name": "CausalVQA",
+    "phase": "standard",
+    "runner": "causalvqa",
+    "metric": "paired_accuracy",
+    "scale": 1,
+    "reference": 69.0,
+    "count": 100
+  },
+  {
+    "name": "CountBenchQA",
+    "phase": "standard",
+    "runner": "countbenchqa",
+    "metric": "accuracy",
+    "scale": 100,
+    "reference": 92.81314168377823,
+    "count": 487
+  },
+  {
+    "name": "CV-Bench",
+    "phase": "standard",
+    "runner": "cvbench",
+    "metric": "Overall",
+    "scale": 1,
+    "reference": 89.18380015307174,
+    "count": 2638
+  },
+  {
+    "name": "IntPhys2",
+    "phase": "standard",
+    "runner": "intphys2",
+    "metric": "accuracy",
+    "scale": 100,
+    "reference": 51.11989459815547,
+    "count": 6072
+  },
+  {
+    "name": "RealWorldQA",
+    "phase": "standard",
+    "runner": "realworldqa",
+    "metric": "exact_match",
+    "scale": 100,
+    "reference": 73.8562091503268,
+    "count": 765
+  },
+  {
+    "name": "RefCOCO",
+    "phase": "standard",
+    "runner": "refcoco",
+    "metric": "refcoco_Precision@1",
+    "scale": 1,
+    "reference": 86.1438060287606,
+    "count": 57457
+  },
+  {
+    "name": "V-Star Bench",
+    "phase": "standard",
+    "runner": "vstar",
+    "metric": "accuracy",
+    "scale": 100,
+    "reference": 89.52879581151832,
+    "count": 191
+  },
+  {
+    "name": "3DSRBench",
+    "phase": "standard",
+    "runner": "3dsrbench_vlmevalkit",
+    "metric": "vanilla_accuracy",
+    "scale": 100,
+    "reference": 58.37754578127674,
+    "count": 11686
+  },
+  {
+    "name": "EmbSpatial-Bench",
+    "phase": "standard",
+    "runner": "embspatial_vlmevalkit",
+    "metric": "accuracy",
+    "scale": 100,
+    "reference": 84.42307692307692,
+    "count": 3640
+  },
+  {
+    "name": "ERQA",
+    "phase": "standard",
+    "runner": "erqa",
+    "metric": "accuracy",
+    "scale": 100,
+    "reference": 48.5,
+    "count": 400
+  },
+  {
+    "name": "MindCube",
+    "phase": "standard",
+    "runner": "mindcube_vlmevalkit",
+    "metric": "accuracy",
+    "scale": 100,
+    "reference": 50.9218114777347,
+    "count": 21154
+  },
+  {
+    "name": "MMSI-Bench",
+    "phase": "standard",
+    "runner": "mmsi",
+    "metric": "accuracy",
+    "scale": 100,
+    "reference": 34.699999999999996,
+    "count": 1000
+  },
+  {
+    "name": "MMSI-Video-Bench",
+    "phase": "video",
+    "runner": "mmsi_video",
+    "metric": "overall",
+    "scale": 100,
+    "reference": 30.47016274864376,
+    "count": 1106
+  },
+  {
+    "name": "RefSpatial-Bench",
+    "phase": "standard",
+    "runner": "refspatial",
+    "metric": "overall/accuracy",
+    "scale": 100,
+    "reference": 46.57039711191336,
+    "count": 277
+  },
+  {
+    "name": "RoboAfford",
+    "phase": "standard",
+    "runner": "roboafford",
+    "metric": "average_accuracy",
+    "scale": 100,
+    "reference": 73.96829009255045,
+    "count": 338
+  },
+  {
+    "name": "RoboSpatial-Home",
+    "phase": "standard",
+    "runner": "robospatial",
+    "metric": "overall",
+    "scale": 100,
+    "reference": 69.42857142857143,
+    "count": 350
+  },
+  {
+    "name": "ShareRobot-Affordance-mIoU",
+    "phase": "standard",
+    "runner": "sharerobot",
+    "metric": "affordance/average_precision",
+    "scale": 100,
+    "reference": 23.95431768206141,
+    "count": 200
+  },
+  {
+    "name": "ShareRobot-Trajectory-RMSE",
+    "phase": "standard",
+    "runner": "sharerobot",
+    "metric": "trajectory/average_root_mean_square_error",
+    "scale": 1,
+    "reference": 0.41086909637426905,
+    "count": 200
+  },
+  {
+    "name": "ShareRobot-Trajectory-Hausdorff",
+    "phase": "standard",
+    "runner": "sharerobot",
+    "metric": "trajectory/average_hausdorff_distance",
+    "scale": 1,
+    "reference": 0.45141961216317006,
+    "count": 200
+  },
+  {
+    "name": "ShareRobot-Trajectory-Frechet",
+    "phase": "standard",
+    "runner": "sharerobot",
+    "metric": "trajectory/average_discrete_frechet_distance",
+    "scale": 1,
+    "reference": 0.5228584934941675,
+    "count": 200
+  },
+  {
+    "name": "SPARBench",
+    "phase": "standard",
+    "runner": "sparbench",
+    "metric": "overall",
+    "scale": 100,
+    "reference": 69.07954461000884,
+    "count": 20
+  },
+  {
+    "name": "SWITCH",
+    "phase": "standard",
+    "runner": "switch",
+    "metric": "mcq/accuracy",
+    "scale": 100,
+    "reference": 26.466666666666665,
+    "count": 1500
+  },
+  {
+    "name": "VSI-Bench",
+    "phase": "standard",
+    "runner": "vsibench",
+    "metric": "overall",
+    "scale": 100,
+    "reference": 61.602515946702695,
+    "count": 5130
+  },
+  {
+    "name": "Where2Place",
+    "phase": "standard",
+    "runner": "where2place",
+    "metric": "accuracy",
+    "scale": 100,
+    "reference": 61.062745105475194,
+    "count": 100
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "name": "understanding",
+  "model_mode": "reasoner",
+  "prompt": "What color is the square on the tray? Answer with one word.",
+  "vision_path": "understanding.png",
+  "max_new_tokens": 16,
+  "seed": 1
+}

@@ -1,0 +1,7 @@
+{
+  "name": "understanding",
+  "model_mode": "reasoner",
+  "prompt": "Describe the image.",
+  "vision_path": "observation.png",
+  "max_new_tokens": 128
+}

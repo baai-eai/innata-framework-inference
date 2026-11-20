@@ -1,0 +1,80 @@
+<!-- Copyright (c) 2026, BAAI. All rights reserved. -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+# Asset provenance
+
+Source files have individual copyright and provenance headers. JSON assets, text
+prompts, and README media are documented by path to preserve their original formats.
+Upstream material is distributed with the OpenMDW-1.1 agreement in
+[LICENSES/OpenMDW-1.1.txt](LICENSES/OpenMDW-1.1.txt); applicable third-party notices and license texts are in
+[NOTICE](NOTICE), [ATTRIBUTIONS.md](ATTRIBUTIONS.md), and [LICENSES/](LICENSES/).
+A recorded source does not claim that NVIDIA owns every third-party asset.
+
+| File | Source |
+| --- | --- |
+| `cosmos_framework/data/generator/action/normalizer_stats/agibotworld_beta_lerobot_stats.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/data/generator/action/normalizer_stats/agibotworld_beta_lerobot_stats.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/data/generator/action/normalizer_stats/bridge_orig_lerobot_stats.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/data/generator/action/normalizer_stats/bridge_orig_lerobot_stats.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/data/generator/action/normalizer_stats/droid_lerobot_stats.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/data/generator/action/normalizer_stats/droid_lerobot_stats.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/data/generator/action/normalizer_stats/fractal_lerobot_stats.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/data/generator/action/normalizer_stats/fractal_lerobot_stats.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/data/generator/action/normalizer_stats/human_hand_pose_lerobot_stats.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/data/generator/action/normalizer_stats/human_hand_pose_lerobot_stats.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/data/generator/action/normalizer_stats/libero_native_frame_wise_relative_rot6d.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/data/generator/action/normalizer_stats/libero_native_frame_wise_relative_rot6d.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/data/generator/action/normalizer_stats/robomind_franka_dual_stats.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/data/generator/action/normalizer_stats/robomind_franka_dual_stats.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/data/generator/action/normalizer_stats/robomind_franka_stats.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/data/generator/action/normalizer_stats/robomind_franka_stats.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/data/generator/action/normalizer_stats/robomind_ur_stats.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/data/generator/action/normalizer_stats/robomind_ur_stats.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/data/generator/action/normalizer_stats/umi_lerobot_stats.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/data/generator/action/normalizer_stats/umi_lerobot_stats.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/audio_image2video/sample_args.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/audio_image2video/sample_args.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/forward_dynamics/sample_args.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/forward_dynamics/sample_args.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/image2image/sample_args.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/image2image/sample_args.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/image2video/sample_args.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/image2video/sample_args.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/inverse_dynamics/sample_args.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/inverse_dynamics/sample_args.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/neg_prompts.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/neg_prompts.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/prompt_upsampler.txt` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/prompt_upsampler.txt); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/release_eval/understanding.json` | BAAI RF03-104 evaluator profiles, Apache-2.0 |
+| `cosmos_framework/inference/defaults/release_eval/understanding_scores.json` | BAAI RF03-104 evaluation reference metrics and coverage, Apache-2.0 |
+| `cosmos_framework/inference/defaults/reasoner/sample_args.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/reasoner/sample_args.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/text2image/sample_args.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/text2image/sample_args.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/text2video/sample_args.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/text2video/sample_args.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/video2video/sample_args.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/video2video/sample_args.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/video_captioner.txt` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/video_captioner.txt); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/defaults/wam/sample_args.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/defaults/wam/sample_args.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/external_api/posttrained_i2v_json_schema.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/external_api/posttrained_i2v_json_schema.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/external_api/posttrained_i2v_prompt.txt` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/external_api/posttrained_i2v_prompt.txt); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/external_api/t2i_json_schema.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/external_api/t2i_json_schema.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/external_api/t2i_prompt.txt` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/external_api/t2i_prompt.txt); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/external_api/t2v_i2v_video_json_schema.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/external_api/t2v_i2v_video_json_schema.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/external_api/t2v_i2v_video_prompt.txt` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/external_api/t2v_i2v_video_prompt.txt); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/reasoner/reasoner_i2v_json_schema.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/reasoner/reasoner_i2v_json_schema.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/reasoner/reasoner_i2v_prompt.txt` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/reasoner/reasoner_i2v_prompt.txt); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/reasoner/reasoner_t2i_json_schema.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/reasoner/reasoner_t2i_json_schema.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/reasoner/reasoner_t2i_prompt.txt` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/reasoner/reasoner_t2i_prompt.txt); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/reasoner/reasoner_t2v_json_schema.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/reasoner/reasoner_t2v_json_schema.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/inference/prompting_templates/reasoner/reasoner_t2v_prompt.txt` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/inference/prompting_templates/reasoner/reasoner_t2v_prompt.txt); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/model/generator/reasoner/nemotron_3_dense_vl/configs/Nemotron-2B-Dense-VL.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/model/generator/reasoner/nemotron_3_dense_vl/configs/Nemotron-2B-Dense-VL.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/model/generator/reasoner/qwen3_vl/configs/Qwen3-VL-2B-Instruct.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/model/generator/reasoner/qwen3_vl/configs/Qwen3-VL-2B-Instruct.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/model/generator/reasoner/qwen3_vl/configs/Qwen3-VL-32B-Instruct.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/model/generator/reasoner/qwen3_vl/configs/Qwen3-VL-32B-Instruct.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/model/generator/reasoner/qwen3_vl/configs/Qwen3-VL-4B-Instruct.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/model/generator/reasoner/qwen3_vl/configs/Qwen3-VL-4B-Instruct.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/model/generator/reasoner/qwen3_vl/configs/Qwen3-VL-8B-Instruct.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/model/generator/reasoner/qwen3_vl/configs/Qwen3-VL-8B-Instruct.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/model/generator/reasoner/qwen3_vl_moe/configs/Qwen3-VL-235B-A22B-Instruct.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/model/generator/reasoner/qwen3_vl_moe/configs/Qwen3-VL-235B-A22B-Instruct.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `cosmos_framework/model/generator/reasoner/qwen3_vl_moe/configs/Qwen3-VL-30B-A3B-Instruct.json` | [NVIDIA Cosmos Framework snapshot](https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/cosmos_framework/model/generator/reasoner/qwen3_vl_moe/configs/Qwen3-VL-30B-A3B-Instruct.json); see LICENSES/OpenMDW-1.1.txt and NOTICE |
+| `examples/text-to-video.json` | Copyright (c) 2026, BAAI. All rights reserved. [Apache-2.0](LICENSE). |
+| `examples/wam.json` | Copyright (c) 2026, BAAI. All rights reserved. [Apache-2.0](LICENSE). |
+| `examples/acwm.json` | Copyright (c) 2026, BAAI. [Apache-2.0](LICENSE). |
+| `examples/understanding.json` | Copyright (c) 2026, BAAI. [Apache-2.0](LICENSE). |
+| `examples/robodojo-wam.json` | Copyright (c) 2026, BAAI. [Apache-2.0](LICENSE). |
+| `examples/robocasa-wam.json` | Copyright (c) 2026, BAAI. [Apache-2.0](LICENSE). |
+
+Model checkpoints, datasets, and external downloads are not included here;
+consult their own licenses and access terms before use.
+
+## README media
+
+| Path | Source |
+| --- | --- |
+| `assets/innata-wam-film.jpg` | Still at 00:38.000 from `innata0-promo.mp4`, the English Innata-0 homepage film. |
+
+## Release smoke fixtures
+
+The request JSON files in `examples/release-smoke/` are adapted from the
+BAAI release templates listed above. The four PNG observations and
+`actions.json` are BAAI-created synthetic inputs. All files in this
+fixture directory are copyright (c) 2026, BAAI, under [Apache-2.0](LICENSE).

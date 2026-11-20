@@ -1,0 +1,81 @@
+{
+  "name": "robocasa",
+  "model_mode": "wam",
+  "prompt": "{\"command\": \"Move the object to the target area.\", \"embodiment\": \"panda_omron_mobile__parallel_gripper\", \"duration\": \"0.8s\", \"fps\": 20, \"action_frequency_hz\": 20, \"resolution\": {\"W\": 640, \"H\": 720}, \"aspect_ratio\": \"8:9\", \"camera_layout\": [[\"main\", \"top\", 640, 480], [\"left_wrist\", \"bottom_left\", 320, 240], [\"right_wrist\", \"bottom_right\", 320, 240]]}",
+  "vision_path": "robocasa.png",
+  "fps": 20,
+  "action_chunk_size": 16,
+  "num_frames": 17,
+  "num_steps": 30,
+  "guidance": 2.0,
+  "shift": 5.0,
+  "seed": 42,
+  "extra": {
+    "action128": {
+      "action_domain": "panda_omron_mobile/native_control12/robocasa365_source_controller_v1",
+      "action_dim_mask": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "action_fps": 20,
+      "selected_roles": [
+        "main",
+        "left_wrist",
+        "right_wrist"
+      ],
+      "camera_layout": [
+        [
+          "main",
+          "top",
+          640,
+          480
+        ],
+        [
+          "left_wrist",
+          "bottom_left",
+          320,
+          240
+        ],
+        [
+          "right_wrist",
+          "bottom_right",
+          320,
+          240
+        ]
+      ],
+      "return_video": false
+    },
+    "sft": {
+      "state_history": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0.02,
+          0
+        ]
+      ]
+    }
+  }
+}
