@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="390" viewBox="0 0 1280 390" role="img" aria-labelledby="title description">
+  <!-- Copyright (c) 2026, BAAI. All rights reserved. -->
+  <!-- SPDX-License-Identifier: Apache-2.0 -->
+  <title id="title">Innata Framework Inference</title>
+  <desc id="description">Innata's dark blue visual identity and an observation-to-action WAM flow.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#060a14"/><stop offset=".55" stop-color="#0b1c37"/><stop offset="1" stop-color="#10346a"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#438fe0" stop-opacity=".28"/><stop offset="1" stop-color="#438fe0" stop-opacity="0"/></radialGradient>
+    <linearGradient id="beam"><stop stop-color="#a493ff"/><stop offset=".35" stop-color="#55adf7"/><stop offset=".7" stop-color="#5fd08e"/><stop offset="1" stop-color="#e8a94c"/></linearGradient>
+    <pattern id="grid" width="38" height="38" patternUnits="userSpaceOnUse"><path d="M 38 0 L 0 0 0 38" fill="none" stroke="#dbeaff" stroke-opacity=".035"/></pattern>
+  </defs>
+  <rect width="1280" height="390" rx="4" fill="url(#background)"/>
+  <rect width="1280" height="390" fill="url(#grid)"/>
+  <ellipse cx="1020" cy="175" rx="390" ry="260" fill="url(#glow)"/>
+  <path d="M0 327 C 215 293, 406 351, 610 320 S 1016 256, 1280 298" fill="none" stroke="#6db7ff" stroke-opacity=".22"/>
+  <path d="M0 346 C 227 314, 403 369, 620 340 S 1020 279, 1280 317" fill="none" stroke="#6db7ff" stroke-opacity=".12"/>
+  <g transform="translate(88 72)" fill="none" stroke-width="5" stroke-linecap="round">
+    <path d="M0 -24 A24 24 0 0 1 23 -7" stroke="#a493ff"/><path d="M24 1 A24 24 0 0 1 8 23" stroke="#e8a94c"/><path d="M0 24 A24 24 0 0 1 -23 7" stroke="#5fd08e"/><path d="M-24 -1 A24 24 0 0 1 -8 -23" stroke="#55adf7"/>
+  </g>
+  <text x="130" y="78" fill="#c5c2bb" font-family="Arial, sans-serif" font-size="16" letter-spacing="3">INNATA  /  BAAI</text>
+  <text x="64" y="189" fill="#f3efe6" font-family="Georgia, 'Times New Roman', serif" font-size="83" letter-spacing="-2">Innata</text>
+  <text x="67" y="235" fill="#e9eef5" font-family="Arial, sans-serif" font-size="24" letter-spacing="3.5">FRAMEWORK  /  INFERENCE</text>
+  <path d="M67 264 H495" stroke="#d8e8ff" stroke-opacity=".3"/>
+  <text x="67" y="301" fill="#b7c5d8" font-family="Georgia, 'Times New Roman', serif" font-size="21">Ground, predict, act</text>
+  <g font-family="Arial, sans-serif">
+    <path d="M734 189 H1114" stroke="#a9d3ff" stroke-opacity=".36" stroke-width="2"/>
+    <path d="M734 189 H1114" stroke="url(#beam)" stroke-opacity=".8" stroke-width="2" stroke-dasharray="5 13"/>
+    <g transform="translate(690 126)"><rect width="126" height="126" rx="18" fill="#111d34" fill-opacity=".92" stroke="#a493ff" stroke-opacity=".65"/><circle cx="63" cy="43" r="14" fill="none" stroke="#a493ff" stroke-width="2"/><path d="M43 75 H83 M48 84 H78" stroke="#a493ff" stroke-width="2" stroke-linecap="round"/><text x="63" y="108" text-anchor="middle" fill="#d9d1ff" font-size="13" letter-spacing="2">OBSERVE</text></g>
+    <g transform="translate(865 126)"><rect width="126" height="126" rx="18" fill="#10253e" fill-opacity=".96" stroke="#55adf7" stroke-opacity=".75"/><path d="M40 36 L63 23 L86 36 V62 L63 75 L40 62 Z M40 36 L63 49 L86 36 M63 49 V75" fill="none" stroke="#75c2ff" stroke-width="2" stroke-linejoin="round"/><text x="63" y="108" text-anchor="middle" fill="#c7e7ff" font-size="13" letter-spacing="2">WAM</text></g>
+    <g transform="translate(1040 126)"><rect width="126" height="126" rx="18" fill="#102b30" fill-opacity=".96" stroke="#5fd08e" stroke-opacity=".65"/><path d="M42 67 L55 53 L68 59 L84 39 M76 39 H84 V47" fill="none" stroke="#77dfa6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="42" cy="67" r="3" fill="#77dfa6"/><circle cx="55" cy="53" r="3" fill="#77dfa6"/><circle cx="68" cy="59" r="3" fill="#77dfa6"/><text x="63" y="108" text-anchor="middle" fill="#c5f4da" font-size="13" letter-spacing="2">ACTION</text></g>
+  </g>
+  <path d="M67 351 H1213" stroke="url(#beam)" stroke-opacity=".48"/>
+  <text x="1213" y="373" text-anchor="end" fill="#a0b1c7" font-family="Arial, sans-serif" font-size="12" letter-spacing="2">INNATA FRAMEWORK</text>
+</svg>

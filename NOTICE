@@ -1,0 +1,65 @@
+Cosmos
+
+Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES.
+Copyright (c) 2026, BAAI. All rights reserved for BAAI contributions.
+
+BAAI-original files and contributions are marked in their file headers.
+See COPYRIGHTS.md for data and prompt files without comment headers.
+
+This file contains attribution notices for third-party source code that is
+adapted, copied, or vendored in this repository. Dependency notices are listed
+separately in ATTRIBUTIONS.md.
+
+Additional NVIDIA Cosmos Framework source (OpenMDW-1.1):
+  https://github.com/NVIDIA/cosmos-framework/tree/fa1881878ab9b234583d89319d56c7903be5161d/cosmos_framework/data/generator
+  cosmos_framework/data/generator/sound_data_utils.py
+  cosmos_framework/data/generator/processors/audio_utils.py
+  cosmos_framework/data/generator/processors/parakeet_audio_processor.py
+  cosmos_framework/data/generator/processors/qwen3_omni_audio_processor.py
+
+MMEngine file I/O
+Source: https://github.com/open-mmlab/mmengine
+License: Apache-2.0 (see LICENSES/Apache-2.0.txt)
+Notice: Copyright (c) OpenMMLab. All rights reserved.
+The easy_io package is built on MMEngine; its file_client.py includes adapted
+MMEngine code. The upstream easy_io README also credits Jam as an inspiration:
+https://gitlab.com/qsh.zh/jam/ (MIT License).
+
+HuggingFace Transformers / Qwen
+Source: https://github.com/huggingface/transformers
+License: Apache-2.0
+Notices:
+  Copyright 2024 The Qwen team, Alibaba Group and the HuggingFace Inc. team.
+  Copyright 2025 The Qwen team, Alibaba Group and the HuggingFace Inc. team.
+  Copyright 2025 The Qwen Team and The HuggingFace Inc. team.
+  Copyright 2025 HuggingFace Inc. team.
+Files:
+  cosmos_framework/model/generator/reasoner/qwen3_vl/configuration_qwen3_vl.py
+  cosmos_framework/model/generator/reasoner/qwen3_vl/qwen3_vl.py
+  cosmos_framework/model/generator/reasoner/qwen3_vl/utils.py
+  cosmos_framework/model/generator/reasoner/qwen3_vl/video_processing_qwen3_vl.py
+
+ByteDance-Seed Bagel / Qwen2 tokenizer
+Source: https://github.com/ByteDance-Seed/Bagel
+License: Apache-2.0
+Notice:
+  Copyright 2024 The Qwen Team and The HuggingFace Inc. team.
+File:
+  cosmos_framework/model/generator/tokenizers/tokenization_qwen2.py
+
+HuggingFace Diffusers UniPC scheduler
+Source: https://github.com/huggingface/diffusers
+License: Apache-2.0
+Notices:
+  Copyright 2024 TSAIL Team and The HuggingFace Team. All rights reserved.
+  Copyright 2024-2025 The Alibaba Wan Team Authors. All rights reserved.
+File:
+  cosmos_framework/model/generator/diffusion/samplers/fm_solvers_unipc.py
+
+Detectron2 lazy config helpers
+Source: https://github.com/facebookresearch/detectron2
+License: Apache-2.0
+Notice:
+  Copyright (c) Facebook, Inc. and its affiliates.
+File:
+  cosmos_framework/utils/lazy_config/__init__.py

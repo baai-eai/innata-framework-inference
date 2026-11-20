@@ -1,0 +1,186 @@
+# Copyright (c) 2026, BAAI. All rights reserved.
+# Adapted from https://github.com/NVIDIA/cosmos-framework/blob/c14617c2bc93dacbf69674fb964eec93182933d9/pyproject.toml
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: OpenMDW-1.1
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "innata-framework-inference"
+version = "0.3.3"
+authors = [
+  {name = "BAAI"},
+]
+description = "World action model inference for Innata"
+requires-python = ">=3.13,<3.14"
+license = {text = "Mixed; see LICENSE, NOTICE, and LICENSES/"}
+license-files = {paths = ["LICENSE", "NOTICE", "ATTRIBUTIONS.md", "COPYRIGHTS.md", "LICENSES/*.txt"]}
+readme = "README.md"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: GPU :: NVIDIA CUDA",
+  "Intended Audience :: Science/Research",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "accelerate",
+  "attrs",
+  "boto3",
+  "ftfy",
+  "huggingface-hub",
+  "numpy>=2.0,<2.3",
+  "pillow",
+  "pyarrow",
+  "pyyaml",
+  "qwen-vl-utils",
+  "safetensors",
+  "torch>=2.10",
+  "torchvision>=0.25",
+  "typing-extensions",
+  "av",
+  "cattrs",
+  "diffusers>=0.39.0",
+  "einops",
+  "hydra-core",
+  "imageio-ffmpeg",
+  "imageio",
+  "iopath>=0.1.10",
+  "loguru",
+  "msgpack",
+  "nvidia-cudnn-frontend",
+  "nvidia-ml-py",
+  "tqdm",
+  "obstore",
+  "omegaconf",
+  "pydantic",
+  "requests",
+  "scipy",
+  "soundfile",
+  "termcolor",
+  "transformers>=4.57.1,<5.0.0",
+  "tyro",
+  "uv",
+  "websockets",
+]
+
+[project.optional-dependencies]
+guardrail = [
+  "better-profanity",
+  "nltk",
+  "protobuf",
+  "retinaface-py",
+  "sentencepiece",
+]
+[dependency-groups]
+dev = [
+  "hatch",
+  "pyinstrument",
+  "pyrefly==0.55.0",
+  "pytest",
+  "pytest-custom_exit_code",
+  "pytest-cov",
+  "pytest-env",
+  "pytest-instafail",
+  "pytest-regressions",
+  "pytest-xdist",
+  "ruff==0.12.7",
+  "uv",
+]
+cu130 = [
+  "flash-attn-3-nv==1.0.3+cu130.torch210; platform_machine == 'x86_64'",
+  "flash-attn==2.7.4.post1+cu130.torch210; platform_machine == 'x86_64'",
+  # GB300/B300 (sm_103a): use the custom build that includes sm_103a kernels (both arches).
+  "natten==0.21.6.dev6+cu130.torch210.gb300; platform_machine == 'aarch64'",
+  "natten==0.21.6.dev6+cu130.torch210.gb300; platform_machine == 'x86_64'",
+  "torch==2.10.0+cu130",
+  "torchcodec==0.10.0+cu130", # https://github.com/meta-pytorch/torchcodec/releases
+  "torchvision==0.25.0+cu130", # https://github.com/pytorch/vision/releases
+  # Dependencies determined from 'uv pip install --dry-run "torch==2.10.0+cu130" --index-url https://download.pytorch.org/whl'
+  # Issue: https://github.com/astral-sh/uv/issues/14237
+  "nvidia-cublas==13.1.0.3",
+  "nvidia-cuda-cupti==13.0.85",
+  "nvidia-cuda-nvrtc==13.0.88",
+  "nvidia-cuda-runtime==13.0.96",
+  "nvidia-cudnn-cu13==9.15.1.9",
+  "nvidia-cufft==12.0.0.61",
+  "nvidia-cufile==1.15.1.6",
+  "nvidia-curand==10.4.0.35",
+  "nvidia-cusolver==12.0.4.66",
+  "nvidia-cusparse==12.6.3.3",
+  "nvidia-cusparselt-cu13==0.8.0",
+  "nvidia-nccl-cu13==2.28.9",
+  "nvidia-npp==13.0.0.50",
+  "nvidia-nvjitlink==13.0.88",
+  "nvidia-nvshmem-cu13==3.4.5",
+  "nvidia-nvtx==13.0.85",
+]
+[project.scripts]
+innata-infer = "cosmos_framework.scripts.inference:main"
+
+[project.urls]
+repository = "https://github.com/baai-eai/innata-framework-inference"
+
+[tool.uv]
+required-version = ">=0.11.3"
+required-environments = [
+  "sys_platform == 'linux' and platform_machine == 'x86_64'",
+  "sys_platform == 'linux' and platform_machine == 'aarch64'",
+]
+
+[tool.uv.sources]
+flash-attn = { index = "cosmos"}
+flash-attn-3-nv = { index = "cosmos" }
+natten = { index = "cosmos"}
+torch = { index = "pytorch"}
+torchao = { index = "pytorch"}
+torchcodec = { index = "pytorch" }
+torchvision = { index = "pytorch"}
+transformer-engine = { index = "cosmos"}
+triton = { index = "pytorch"}
+
+[[tool.uv.index]]
+name = "cosmos"
+url = "https://nvidia-cosmos.github.io/cosmos-dependencies/v1.5.0"
+explicit = true
+
+[[tool.uv.index]]
+name = "natten"
+url = "https://whl.natten.org"
+explicit = true
+format = "flat"
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl"
+explicit = true
+
+[tool.uv.audit]
+ignore = [
+  # diskcache: No known fix
+  "GHSA-w8v5-vhqr-4h9v",
+  # transformers: Upgrade to >=5
+  "GHSA-69w3-r845-3855",
+  "PYSEC-2025-217",
+  # flash-attn: flash-attn deserialization isn't used in cosmos3 package
+  "GHSA-7g5w-pq96-8c5w",
+  # torch, no fix
+  "PYSEC-2026-139",
+  # Need vllm 0.20
+  "GHSA-83vm-p52w-f9pw",
+  "GHSA-hpv8-x276-m59f"
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["/cosmos_framework", "/LICENSE", "/NOTICE", "/LICENSES", "/ATTRIBUTIONS.md", "/COPYRIGHTS.md", "/CONTRIBUTORS.md", "/README.md", "/examples", "/assets"]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  "cosmos_framework",
+]
+exclude = [
+  "*_test.py",
+]
