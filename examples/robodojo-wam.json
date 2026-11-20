@@ -1,0 +1,145 @@
+{
+  "name": "robodojo",
+  "model_mode": "wam",
+  "prompt": "{\"command\": \"Move the object to the target area.\", \"plan_history\": [], \"current_plan\": \"Move the object.\", \"embodiment\": \"arx_x5__parallel_gripper\", \"duration\": \"0.64s\", \"fps\": 25, \"action_frequency_hz\": 25, \"resolution\": {\"W\": 640, \"H\": 720}, \"aspect_ratio\": \"8:9\", \"camera_layout\": [[\"main\", \"top\", 640, 480], [\"left_wrist\", \"bottom_left\", 320, 240], [\"right_wrist\", \"bottom_right\", 320, 240]]}",
+  "vision_path": "robodojo-observation.png",
+  "fps": 25,
+  "action_chunk_size": 16,
+  "num_frames": 21,
+  "num_steps": 30,
+  "guidance": 1.0,
+  "shift": 5.0,
+  "seed": 42,
+  "extra": {
+    "action128": {
+      "action_domain": "arx_x5__parallel_gripper/joint128/native_joint_target_unverified_control/robodojo-unified-canonical-tcp-r2-v1-20261011_sim_arx_x5_robodojo-r1-native-joint14-observed-eef20-v1/observed_next_state_v2",
+      "action_dim_mask": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "action_fps": 25,
+      "selected_roles": [
+        "main",
+        "left_wrist",
+        "right_wrist"
+      ],
+      "camera_layout": [
+        [
+          "main",
+          "top",
+          640,
+          480
+        ],
+        [
+          "left_wrist",
+          "bottom_left",
+          320,
+          240
+        ],
+        [
+          "right_wrist",
+          "bottom_right",
+          320,
+          240
+        ]
+      ],
+      "return_video": false
+    },
+    "sft": {
+      "state_history": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    }
+  }
+}

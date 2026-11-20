@@ -1,0 +1,628 @@
+{
+  "standard": {
+    "model": {
+      "model_type": "cosmos-qwen3-vl-vllm-api",
+      "model_id": "innata-rf03"
+    },
+    "model_overrides": {
+      "image_preprocess_mode": "native",
+      "device_map": "cuda",
+      "cast_inputs_to_model_dtype": true,
+      "video_backend": "decord_floor",
+      "video_fps": 4.0,
+      "image_patch_size": 16,
+      "native_image_benchmarks": [
+        "refspatial"
+      ],
+      "legacy_image_benchmarks": [
+        "countbenchqa",
+        "mvpbench",
+        "mmsi",
+        "erqa",
+        "realworldqa"
+      ],
+      "no_cast_image_benchmarks": [
+        "countbenchqa",
+        "mvpbench",
+        "mmsi",
+        "erqa",
+        "refspatial",
+        "realworldqa"
+      ],
+      "file_descriptor": {
+        "soft_limit": 65536,
+        "monitor_interval": 1.0,
+        "warn_ratio": 0.8,
+        "critical_ratio": 0.9,
+        "reserve": 256,
+        "max_media_decodes": 16,
+        "wait_timeout": 60.0
+      },
+      "launch_mode": "managed",
+      "tensor_parallel_size": 1,
+      "vllm_dtype": "bfloat16",
+      "vllm_max_model_len": 65536,
+      "vllm_max_num_batched_tokens": 12432,
+      "vllm_max_num_seqs": 16,
+      "vllm_gpu_memory_utilization": 0.65,
+      "vllm_load_format": "safetensors",
+      "vllm_safetensors_load_strategy": "eager",
+      "vllm_limit_mm_per_prompt": {
+        "image": 64,
+        "video": 2
+      },
+      "vllm_media_io_kwargs": {
+        "video": {
+          "num_frames": 32
+        }
+      },
+      "vllm_mm_encoder_attn_backend": "FLASH_ATTN",
+      "vllm_attention_backend": "FLASH_ATTN",
+      "vllm_flash_attn_version": 3,
+      "vllm_kv_cache_dtype": "auto",
+      "vllm_enable_prefix_caching": false,
+      "vllm_enforce_eager": false,
+      "vllm_offline": true,
+      "vllm_startup_timeout_seconds": 900.0,
+      "vllm_shutdown_timeout_seconds": 30.0,
+      "media_transport": "file_url",
+      "max_concurrency": 8,
+      "video_cache_entries": 8,
+      "timeout_seconds": 600.0,
+      "health_timeout_seconds": 5.0,
+      "retries": 2,
+      "retry_backoff_seconds": 1.0
+    },
+    "model_overrides_by_benchmark": {},
+    "parallel": {
+      "mode": "adaptive-batch",
+      "adaptive-batch": {
+        "gpus_per_service": 1,
+        "num_services": 4,
+        "start_method": "spawn",
+        "shuffle_seed": 0,
+        "benchmark_batch_costs": {},
+        "progress_interval_seconds": 0.5,
+        "progress_batch_interval": 4
+      }
+    },
+    "run": {
+      "show_progress": true,
+      "benchmarks": [
+        "blink",
+        "causalvqa",
+        "countbenchqa",
+        "intphys2",
+        "realworldqa",
+        "refcoco",
+        "vstar",
+        "3dsrbench_vlmevalkit",
+        "cvbench",
+        "embspatial_vlmevalkit",
+        "erqa",
+        "mindcube_vlmevalkit",
+        "mmsi",
+        "refspatial",
+        "roboafford",
+        "robospatial",
+        "sharerobot",
+        "sparbench",
+        "switch",
+        "vsibench",
+        "where2place"
+      ]
+    },
+    "benchmarks": {
+      "blink": {
+        "data_dir": "BLINK/decoded",
+        "dataset_split": "val",
+        "prompt_mode": "legacy",
+        "image_preprocess": "none",
+        "extraction_protocol": "deterministic",
+        "batch_size": 4,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 32,
+        "prepare_backend": "thread",
+        "subtasks": [
+          "Relative_Depth",
+          "Spatial_Relation"
+        ],
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "manifest": "{split}.jsonl",
+        "limit": null
+      },
+      "causalvqa": {
+        "data_dir": "CausalVQA",
+        "annotation_file": "debug/debug_metadata.csv",
+        "video_dir": "debug/videos",
+        "max_new_tokens": 1024,
+        "do_sample": false,
+        "temperature": 0.0,
+        "num_frames": 16,
+        "aggregation_mode": "overall",
+        "macro_weight_by_size": false,
+        "batch_size": 1,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "seed": 1,
+        "limit": null
+      },
+      "countbenchqa": {
+        "data_dir": "CountBenchQA-vlmevalkit",
+        "manifest": "manifest.jsonl",
+        "protocol": "vlmevalkit",
+        "max_new_tokens": 2048,
+        "temperature": 0.0,
+        "do_sample": false,
+        "batch_size": 8,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "seed": 1,
+        "limit": null
+      },
+      "intphys2": {
+        "data_dir": "IntPhys2",
+        "dataset_split": "Main",
+        "difficulty": "all",
+        "batch_size": 32,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "max_new_tokens": 512,
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "splits": {
+          "test": "Main",
+          "main": "Main",
+          "debug": "Debug",
+          "heldout": "HeldOut"
+        },
+        "fps": 1.0,
+        "seeds": [
+          1,
+          2
+        ],
+        "prompts": [
+          {
+            "response_format": "yes_no",
+            "text": "The video you’re seeing was generated by a simulator. Given how objects behave on earth, is the behaviour of the objects plausible? Your answer should be based on the events in the video and ignore the quality of the simulation. You should also ignore the framerate of the video, as it may be slowed down. Finish your answer by Yes or No"
+          },
+          {
+            "response_format": "binary",
+            "text": "Analyze the physics simulations in the video. Determine if the video depicts object behavior that is consistent with Earth's physical laws. Ignore simulation quality and playback speed. CRITICAL OUTPUT INSTRUCTION: Your response must be only a binary value indicating whether the object behavior is consistent with Earth's physical laws: 1: Object behavior is consistent with Earth's physical laws. 0: Object behavior is not consistent with Earth's physical laws. Please provide your analysis in the required format. Do not include any other text, explanation, context, preamble, or punctuation before or after the answer."
+          },
+          {
+            "response_format": "yes_no",
+            "text": "Analyze the physics simulations in the video. Determine if the video depicts object behavior that is consistent with Earth's physical laws. Ignore simulation quality and playback speed. CRITICAL OUTPUT INSTRUCTION: Your response must be only yes or no indicating whether the object behavior is consistent with Earth's physical laws: yes: Object behavior is consistent with Earth's physical laws. no: Object behavior is not consistent with Earth's physical laws. Please provide your analysis in the required format. Do not include any other text, explanation, context, preamble, or punctuation before or after the answer."
+          }
+        ],
+        "limit": null
+      },
+      "realworldqa": {
+        "data_dir": "RealworldQA/decoded",
+        "protocol": "vlmevalkit",
+        "vlmevalkit_image_preprocess": "vlmevalkit_api_jpeg",
+        "max_new_tokens": 4096,
+        "batch_size": 16,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "manifest": "manifest.jsonl",
+        "vlmevalkit_manifest": "manifest_vlmevalkit.jsonl",
+        "limit": null
+      },
+      "refcoco": {
+        "data_dir": "RefCOCO/vlmevalkit_decoded",
+        "manifest": "manifest.jsonl",
+        "max_new_tokens": 2048,
+        "temperature": 0.0,
+        "top_p": null,
+        "num_beams": 1,
+        "do_sample": false,
+        "seed": 1,
+        "batch_size": 1,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "limit": null
+      },
+      "vstar": {
+        "implementation": "vlmevalkit",
+        "data_dir": "VStarBench",
+        "annotation_file": "VStarBench.tsv",
+        "image_dir": "images/VStarBench",
+        "protocol": "vlmevalkit_image_mcq",
+        "dataset_name": "VStarBench",
+        "vlmevalkit_commit": "1868e7893aa5656c02797452fec8f490bf4419e2",
+        "dataset_revision": "b1312e6fbf89ace5a50cc5b0214010aeb0f69bdc",
+        "tsv_url": "https://huggingface.co/datasets/xjtupanda/VStar_Bench/resolve/main/VStarBench.tsv",
+        "tsv_md5": "b18854d7075574be06b631cd5f7d2d6a",
+        "expected_rows": 191,
+        "batch_size": 4,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "variants": {
+          "vlmevalkit": {
+            "data_dir": "VStarBench",
+            "annotation_file": "VStarBench.tsv",
+            "image_dir": "images/VStarBench",
+            "protocol": "vlmevalkit_image_mcq",
+            "dataset_name": "VStarBench",
+            "vlmevalkit_commit": "1868e7893aa5656c02797452fec8f490bf4419e2",
+            "dataset_revision": "b1312e6fbf89ace5a50cc5b0214010aeb0f69bdc",
+            "tsv_url": "https://huggingface.co/datasets/xjtupanda/VStar_Bench/resolve/main/VStarBench.tsv",
+            "tsv_md5": "b18854d7075574be06b631cd5f7d2d6a",
+            "expected_rows": 191
+          },
+          "native": {
+            "data_dir": "V-STaR",
+            "annotation_file": "V_STaR_test.json",
+            "video_dir": "videos",
+            "total_pixels": 16056320,
+            "min_pixels": 12544,
+            "fps": 1.0,
+            "spatial_input_width": null,
+            "spatial_input_height": null,
+            "postprocess": {
+              "enabled": false
+            }
+          }
+        },
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "limit": null
+      },
+      "3dsrbench_vlmevalkit": {
+        "data_dir": "3DSRBench",
+        "batch_size": 4,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "annotation_file": "vlmevalkit/3DSRBench.tsv",
+        "vlmevalkit_commit": "2bb8a90b89088146cd9bf20ac454ad34077399c1",
+        "limit": null
+      },
+      "cvbench": {
+        "data_dir": "CVBench/vlmevalkit",
+        "manifest": "manifest.jsonl",
+        "protocol": "vlmevalkit",
+        "max_new_tokens": 8192,
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "num_beams": 1,
+        "do_sample": false,
+        "seed": 1,
+        "batch_size": 1,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "dataset_path": "mvr_dataset",
+        "video_root": ".",
+        "num_frames": 8,
+        "resized_height": 224,
+        "resized_width": 224,
+        "limit": null
+      },
+      "embspatial_vlmevalkit": {
+        "data_dir": "EmbSpatial-Bench",
+        "batch_size": 4,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "annotation_file": "vlmevalkit/EmbSpatialBench.tsv",
+        "vlmevalkit_commit": "2bb8a90b89088146cd9bf20ac454ad34077399c1",
+        "limit": null
+      },
+      "erqa": {
+        "data_dir": "erqa",
+        "batch_size": 8,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "manifest": "manifest.jsonl",
+        "limit": null
+      },
+      "mindcube_vlmevalkit": {
+        "data_dir": "MindCube",
+        "dataset_variant": "full",
+        "judge_model": "exact_matching",
+        "batch_size": 4,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "dataset_split": "test",
+        "limit": null
+      },
+      "mmsi": {
+        "data_dir": "MMSI-Bench/decoded",
+        "mode": "vanilla",
+        "batch_size": 8,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "manifest": "manifest.jsonl",
+        "limit": null
+      },
+      "refspatial": {
+        "data_dir": "RefSpatial-Bench",
+        "splits": [
+          "location",
+          "placement",
+          "unseen"
+        ],
+        "prompt_protocol": "auto_tuple",
+        "mask_binarization": "round_255",
+        "max_new_tokens": 64,
+        "batch_size": 8,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "limit": null
+      },
+      "roboafford": {
+        "data_dir": "RoboAfford-Eval",
+        "batch_size": 4,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "annotation_file": "annotations_normxy.json",
+        "prompt_protocol": "auto_tuple",
+        "limit": null
+      },
+      "robospatial": {
+        "data_dir": "RoboSpatial-Home",
+        "manifest": "manifest.jsonl",
+        "num_points_to_match": 2,
+        "max_new_tokens": 128,
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "num_beams": 1,
+        "do_sample": false,
+        "batch_size": 8,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "seed": 1,
+        "limit": null
+      },
+      "sharerobot": {
+        "data_dir": "ShareRobot-Bench",
+        "coordinate_mode": "non_pixel",
+        "batch_size": 4,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "tasks": [
+          "affordance",
+          "trajectory"
+        ],
+        "limit": null
+      },
+      "sparbench": {
+        "data_dir": "SPAR-Bench",
+        "manifest": "manifest.jsonl",
+        "max_new_tokens": 100,
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "num_beams": 1,
+        "do_sample": false,
+        "seed": 1,
+        "batch_size": 8,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "pre_prompt": "",
+        "limit": null
+      },
+      "switch": {
+        "data_dir": "SWITCH",
+        "track": "all",
+        "num_frames": 8,
+        "batch_size": 4,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "subsets": [
+          "mcq",
+          "openqa"
+        ],
+        "use_restored_answers": true,
+        "limit": null
+      },
+      "vsibench": {
+        "data_dir": "VSI-Bench",
+        "dataset_config": "full",
+        "num_frames": 32,
+        "input_mode": "video",
+        "frame_cache_dir": ".wm_eval_frames",
+        "batch_size": 1,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 32,
+        "prepare_backend": "thread",
+        "temperature": 0.0,
+        "do_sample": false,
+        "seed": 1,
+        "dataset_name": "nyu-visionx/VSI-Bench",
+        "dataset_split": "test",
+        "video_dir": ".",
+        "limit": null
+      },
+      "where2place": {
+        "data_dir": "where2place",
+        "question_file": "point_questions.jsonl",
+        "mask_dir": "masks",
+        "image_dir": "images",
+        "task": "point",
+        "point_width": 640,
+        "point_height": 480,
+        "max_new_tokens": 128,
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "num_beams": 1,
+        "do_sample": false,
+        "batch_size": 1,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "seed": 1,
+        "limit": null
+      }
+    }
+  },
+  "video": {
+    "model": {
+      "model_type": "cosmos-qwen3-vl-vllm-api",
+      "model_id": "innata-rf03"
+    },
+    "model_overrides": {
+      "image_preprocess_mode": "native",
+      "device_map": "cuda",
+      "cast_inputs_to_model_dtype": true,
+      "video_backend": "decord_floor",
+      "video_fps": 4.0,
+      "image_patch_size": 16,
+      "native_image_benchmarks": [
+        "refspatial"
+      ],
+      "legacy_image_benchmarks": [
+        "countbenchqa",
+        "mvpbench",
+        "mmsi",
+        "erqa",
+        "realworldqa"
+      ],
+      "no_cast_image_benchmarks": [
+        "countbenchqa",
+        "mvpbench",
+        "mmsi",
+        "erqa",
+        "refspatial",
+        "realworldqa"
+      ],
+      "file_descriptor": {
+        "soft_limit": 65536,
+        "monitor_interval": 1.0,
+        "warn_ratio": 0.8,
+        "critical_ratio": 0.9,
+        "reserve": 256,
+        "max_media_decodes": 16,
+        "wait_timeout": 60.0
+      },
+      "launch_mode": "managed",
+      "tensor_parallel_size": 1,
+      "vllm_dtype": "bfloat16",
+      "vllm_max_model_len": 262144,
+      "vllm_max_num_batched_tokens": 12432,
+      "vllm_max_num_seqs": 1,
+      "vllm_gpu_memory_utilization": 0.85,
+      "vllm_load_format": "safetensors",
+      "vllm_safetensors_load_strategy": "eager",
+      "vllm_limit_mm_per_prompt": {
+        "image": 64,
+        "video": 2
+      },
+      "vllm_media_io_kwargs": {
+        "video": {
+          "num_frames": 32
+        }
+      },
+      "vllm_mm_encoder_attn_backend": "FLASH_ATTN",
+      "vllm_attention_backend": "FLASH_ATTN",
+      "vllm_flash_attn_version": 3,
+      "vllm_kv_cache_dtype": "auto",
+      "vllm_enable_prefix_caching": false,
+      "vllm_enforce_eager": false,
+      "vllm_offline": true,
+      "vllm_startup_timeout_seconds": 900.0,
+      "vllm_shutdown_timeout_seconds": 30.0,
+      "media_transport": "file_url",
+      "max_concurrency": 1,
+      "video_cache_entries": 8,
+      "timeout_seconds": 1800.0,
+      "health_timeout_seconds": 5.0,
+      "retries": 2,
+      "retry_backoff_seconds": 1.0
+    },
+    "model_overrides_by_benchmark": {
+      "mmsi_video": {
+        "device_map": "auto"
+      }
+    },
+    "parallel": {
+      "mode": "adaptive-batch",
+      "adaptive-batch": {
+        "gpus_per_service": 1,
+        "num_services": 4,
+        "start_method": "spawn",
+        "shuffle_seed": 0,
+        "benchmark_batch_costs": {},
+        "progress_interval_seconds": 0.5,
+        "progress_batch_interval": 4
+      }
+    },
+    "run": {
+      "show_progress": true,
+      "benchmarks": [
+        "mmsi_video"
+      ]
+    },
+    "benchmarks": {
+      "mmsi_video": {
+        "data_dir": "MMSI-Video-Bench",
+        "annotation_file": "mmsivideo.json",
+        "setting": "Uniform-50",
+        "max_frame": 50,
+        "task_specific": true,
+        "use_frames": true,
+        "max_new_tokens": 8192,
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "num_beams": 1,
+        "do_sample": false,
+        "seed": 1,
+        "batch_size": 1,
+        "prepare_workers": 8,
+        "prepare_prefetch_batches": 16,
+        "prepare_backend": "thread",
+        "limit": null
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "wam_action",
+  "model_mode": "wam",
+  "prompt": "Pick up the object and place it on the tray.",
+  "vision_path": "observation.png",
+  "domain_name": "bridge_orig_lerobot",
+  "view_point": "ego_view",
+  "action_chunk_size": 16,
+  "image_size": 256,
+  "fps": 5,
+  "seed": 42
+}

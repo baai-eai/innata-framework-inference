@@ -1,0 +1,16 @@
+{
+  "name": "acwm",
+  "model_mode": "forward_dynamics",
+  "vision_path": "observation.png",
+  "action_path": "actions.json",
+  "action_chunk_size": 16,
+  "domain_name": "robotwin_ee_abs",
+  "view_point": "third_person_view",
+  "prompt": "{\"embodiment\": \"AgileX_Cobot_Magic_ARX5_dual_arm_parallel_gripper\", \"command\": \"Move the object onto the tray.\", \"duration\": \"1s\", \"fps\": 16.0, \"resolution\": {\"W\": 736, \"H\": 544}, \"aspect_ratio\": \"4,3\"}",
+  "fps": 16,
+  "image_size": 480,
+  "num_steps": 30,
+  "guidance": 1.0,
+  "shift": 5.0,
+  "seed": 0
+}

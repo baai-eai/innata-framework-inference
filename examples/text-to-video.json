@@ -1,0 +1,6 @@
+{
+  "model_mode": "text2video",
+  "name": "clouds",
+  "prompt": "A fixed camera watches soft clouds drift above a grassy hillside.",
+  "resolution": "480"
+}
