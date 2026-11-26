@@ -17,6 +17,7 @@ import attrs
 import torch
 from loguru import logger as logging
 
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.flags import TRAINING
 
 try:
@@ -258,7 +259,7 @@ class JITConfig:
     # Input tensor shape, for example input.
     input_shape: Union[list[int], None] = None
     # Device to compile onto.
-    device: str = "cuda"
+    device: str = attrs.field(factory=lambda: str(torch.accelerator.current_accelerator() or "cpu"))
     # # Data type to compile onto.
     dtype: str = "bfloat16"
     # Strict mode for PyTorch JIT.
@@ -559,7 +560,7 @@ class Config:
 
         # broadcast job.name across all ranks to make sure it is consistent
         # otherwise, unaligned job names leads unaligned path to save checkpoints
-        job_name_tensor = torch.ByteTensor(bytearray(self.job.name, "utf-8")).cuda()
+        job_name_tensor = torch.ByteTensor(bytearray(self.job.name, "utf-8")).to(accelerator_device())
         distributed.broadcast(job_name_tensor, 0)
         self.job.name = job_name_tensor.cpu().numpy().tobytes().decode("utf-8")
 

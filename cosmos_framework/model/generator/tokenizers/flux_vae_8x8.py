@@ -10,8 +10,8 @@ import torch
 from einops import rearrange
 from torch import Tensor, nn
 
-from cosmos_framework.utils.easy_io import easy_io
 from cosmos_framework.model.generator.tokenizers.interface import VideoTokenizerInterface
+from cosmos_framework.utils.easy_io import easy_io
 
 
 @dataclass
@@ -388,7 +388,7 @@ class FluxVAEInterface(VideoTokenizerInterface):
         self.model.eval()
 
         # Set device and dtype
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.accelerator.current_accelerator(check_available=True) or torch.device("cpu")
         self.model = self.model.to(self.device)
         self._dtype = torch.bfloat16
         self.model = self.model.to(self._dtype)

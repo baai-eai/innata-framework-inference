@@ -28,6 +28,7 @@ from torch.distributed._functional_collectives import AsyncCollectiveTensor
 from torch.distributed._tensor.api import DTensor
 
 from cosmos_framework.utils import distributed, log
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.distributed import all_gather_tensor
 from cosmos_framework.utils.easy_io import easy_io
 from cosmos_framework.utils.timer import Timer
@@ -280,13 +281,13 @@ class memory_checker(ContextDecorator):  # noqa: N801
         self.debug = debug
 
     def __enter__(self) -> None:
-        torch.cuda.synchronize()
-        torch.cuda.reset_peak_memory_stats()
-        self.initial_memory = torch.cuda.max_memory_allocated()
+        torch.accelerator.synchronize()
+        torch.accelerator.reset_peak_memory_stats()
+        self.initial_memory = torch.accelerator.max_memory_allocated()
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:  # noqa: ANN001
-        torch.cuda.synchronize()
-        final_memory = torch.cuda.max_memory_allocated()
+        torch.accelerator.synchronize()
+        final_memory = torch.accelerator.max_memory_allocated()
         message = f"Memory used within {self.context}: {(final_memory - self.initial_memory) / 1024**3:.4f} GB"
         if self.debug:
             log.debug(message)
@@ -296,12 +297,12 @@ class memory_checker(ContextDecorator):  # noqa: N801
     def __call__(self, func: T) -> T:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):  # noqa: ANN202
-            torch.cuda.synchronize()
-            torch.cuda.reset_peak_memory_stats()
-            initial_memory = torch.cuda.max_memory_allocated()
+            torch.accelerator.synchronize()
+            torch.accelerator.reset_peak_memory_stats()
+            initial_memory = torch.accelerator.max_memory_allocated()
             result = func(*args, **kwargs)
-            torch.cuda.synchronize()
-            final_memory = torch.cuda.max_memory_allocated()
+            torch.accelerator.synchronize()
+            final_memory = torch.accelerator.max_memory_allocated()
             message = f"Memory used within {self.context}: {(final_memory - initial_memory) / 1024**3:.4f} GB"
             if self.debug:
                 log.debug(message)
@@ -530,14 +531,14 @@ class NVTXRangeContext:
         if not self.enabled:
             return
         if self.synchronize:
-            torch.cuda.synchronize()
+            torch.accelerator.synchronize()
         torch.cuda.nvtx.range_push(self.name)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if not self.enabled:
             return
         if self.synchronize:
-            torch.cuda.synchronize()
+            torch.accelerator.synchronize()
         torch.cuda.nvtx.range_pop()
 
 
@@ -602,14 +603,14 @@ class StragglerDetectorV2:
         for key in local_section_summaries:
             # straggler reports time in ms
             data.append(local_section_summaries[key][straggler.Statistic.MAX] / 1000)
-        return distributed.all_gather_tensor(torch.tensor(data).cuda())
+        return distributed.all_gather_tensor(torch.tensor(data).to(accelerator_device()))
 
     def generate_report(self, iteration):
         if self.enabled and iteration % self.report_freq == 0:
             report = straggler.Detector.generate_report()
             gpu_relative_perf_score = report.gpu_relative_perf_scores[distributed.get_rank()]
             gpu_relative_perf_score_gather_list = distributed.all_gather_tensor(
-                torch.tensor([gpu_relative_perf_score]).cuda()
+                torch.tensor([gpu_relative_perf_score]).to(accelerator_device())
             )
             local_section_data = self._aggregate_section_results(report.local_section_summaries)
             if distributed.get_rank() == 0:
@@ -664,7 +665,7 @@ class StragglerDetectorV2:
                 individual_stragglers = stragglers["straggler_gpus_individual"]
                 is_slowdown = relative_stragglers or individual_stragglers
                 if is_slowdown:
-                    hostname = torch.ByteTensor(bytearray(os.uname().nodename, "utf-8")).cuda()
+                    hostname = torch.ByteTensor(bytearray(os.uname().nodename, "utf-8")).to(accelerator_device())
                     whole_hostname = all_gather_tensor(hostname)
                     slowest_hostname = whole_hostname[slowest_rank_id].cpu().numpy().tobytes().decode("utf-8")
                     logging.critical(f"Slowest rank hostname: {slowest_hostname}")

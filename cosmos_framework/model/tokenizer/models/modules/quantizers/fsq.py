@@ -258,7 +258,6 @@ class FSQ(Module):
 
         return codes
 
-    @autocast("cuda", enabled=False)
     def forward(self, z: Tensor) -> tuple[Tensor, Tensor, Tensor]:
         """Forward pass for FSQ.
 
@@ -275,34 +274,35 @@ class FSQ(Module):
             d - feature dimension
             c - number of codebook dim
         """
-        orig_dtype = z.dtype
+        with autocast(z.device.type, enabled=False):
+            orig_dtype = z.dtype
 
-        # Make sure allowed dtype
-        if z.dtype not in self.allowed_dtypes:
-            z = z.float()
+            # Make sure allowed dtype
+            if z.dtype not in self.allowed_dtypes:
+                z = z.float()
 
-        assert z.shape[-1] == self.dim, f"expected dimension of {self.dim} but found dimension of {z.shape[-1]}"
+            assert z.shape[-1] == self.dim, f"expected dimension of {self.dim} but found dimension of {z.shape[-1]}"
 
-        z = self.project_in.to(z.dtype)(z)
+            z = self.project_in.to(z.dtype)(z)
 
-        z = rearrange(z, "b (c d) -> b c d", c=self.num_codebooks)
+            z = rearrange(z, "b (c d) -> b c d", c=self.num_codebooks)
 
-        codes = self.quantize(z)
-        indices = self.codes_to_indices(codes)
+            codes = self.quantize(z)
+            indices = self.codes_to_indices(codes)
 
-        codes = rearrange(codes, "b c d -> b (c d)")
+            codes = rearrange(codes, "b c d -> b (c d)")
 
-        out = self.project_out.to(z.dtype)(codes)
+            out = self.project_out.to(z.dtype)(codes)
 
-        # Reconstitute image or video dimensions
-        if not self.keep_num_codebooks_dim:
-            indices = rearrange(indices, "... 1 -> ...")
+            # Reconstitute image or video dimensions
+            if not self.keep_num_codebooks_dim:
+                indices = rearrange(indices, "... 1 -> ...")
 
-        # Cast back to original dtype
-        if out.dtype != orig_dtype:
-            out = out.type(orig_dtype)
+            # Cast back to original dtype
+            if out.dtype != orig_dtype:
+                out = out.type(orig_dtype)
 
-        # Placeholder for compatibility
-        commit_loss = torch.tensor(0.0, device=z.device)
+            # Placeholder for compatibility
+            commit_loss = torch.tensor(0.0, device=z.device)
 
-        return out, indices, commit_loss
+            return out, indices, commit_loss

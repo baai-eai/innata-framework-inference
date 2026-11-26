@@ -58,6 +58,7 @@ from torch.distributed.device_mesh import DeviceMesh
 from torch.distributed.tensor import DTensor
 
 from cosmos_framework.utils import log
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.easy_io import easy_io
 from cosmos_framework.utils.flags import INTERNAL
 from cosmos_framework.utils.generator.parallelism import ParallelDims
@@ -1106,7 +1107,7 @@ def load_language_model(
         tensor_to_rank_map,
         rank_tensors,
         rank_tensor_metadata,
-        device="cuda",
+        device=accelerator_device(),
     ):
         if resolved_format == "nemotron_3_dense_vl":
             dest_name, dest_weight = convert_weight_from_nemotron_vl_hf(
@@ -1377,7 +1378,7 @@ def load_vlm_model(
     skipped_model_keys: set[str] = set()
     unexpected_index_keys: set[str] = set()
 
-    target_device = "cuda" if torch.cuda.is_available() else "cpu"
+    target_device = str(torch.accelerator.current_accelerator(check_available=True) or "cpu")
 
     # Resolve the FSDP shard axis.
     dp_shard_mesh = _get_dp_shard_mesh(parallel_dims)
@@ -1645,7 +1646,7 @@ def load_vfm_model(
     keys_loaded: set[str] = set()
     skipped_model_keys: set[str] = set()
 
-    target_device = "cuda" if torch.cuda.is_available() else "cpu"
+    target_device = str(torch.accelerator.current_accelerator(check_available=True) or "cpu")
 
     # Resolve the FSDP shard axis.
     dp_shard_mesh = _get_dp_shard_mesh(parallel_dims)

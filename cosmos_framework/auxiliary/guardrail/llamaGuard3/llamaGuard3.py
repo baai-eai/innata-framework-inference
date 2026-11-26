@@ -10,6 +10,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from cosmos_framework.auxiliary.guardrail.common.core import ContentSafetyGuardrail, GuardrailRunner
 from cosmos_framework.auxiliary.guardrail.llamaGuard3.categories import UNSAFE_CATEGORIES
 from cosmos_framework.utils import log, misc
+from cosmos_framework.utils.device import accelerator_device
 
 SAFE = misc.Color.green("SAFE")
 UNSAFE = misc.Color.red("UNSAFE")
@@ -36,7 +37,7 @@ class LlamaGuard3(ContentSafetyGuardrail):
 
         # Move model to GPU unless offload_model_to_cpu is True
         if not offload_model_to_cpu:
-            self.model = self.model.to("cuda", dtype=self.dtype).eval()
+            self.model = self.model.to(accelerator_device(), dtype=self.dtype).eval()
             log.debug("Moved llamaGuard3 model to GPU")
         else:
             self.model = self.model.to("cpu", dtype=self.dtype).eval()
@@ -67,11 +68,11 @@ class LlamaGuard3(ContentSafetyGuardrail):
         """Filter the Llama Guard 3 model output and return the safety status and message."""
         conversation = [{"role": "user", "content": prompt}]
         if self.offload_model:
-            self.model = self.model.to("cuda")
+            self.model = self.model.to(accelerator_device())
             log.debug("Move llamaGuard3 model to GPU")
         input_ids = self.tokenizer.apply_chat_template(
             conversation, categories=UNSAFE_CATEGORIES, return_tensors="pt"
-        ).to("cuda")
+        ).to(accelerator_device())
         prompt_len = input_ids.shape[1]
         output = self.model.generate(
             input_ids=input_ids,

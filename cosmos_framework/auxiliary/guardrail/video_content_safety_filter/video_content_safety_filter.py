@@ -19,6 +19,7 @@ from cosmos_framework.auxiliary.guardrail.common.io_utils import get_video_filep
 from cosmos_framework.auxiliary.guardrail.video_content_safety_filter.model import ModelConfig, VideoSafetyModel
 from cosmos_framework.auxiliary.guardrail.video_content_safety_filter.vision_encoder import SigLIPEncoder
 from cosmos_framework.utils import log, misc
+from cosmos_framework.utils.device import accelerator_device
 
 # Define the class index to class name mapping for multi-class classification
 CLASS_IDX_TO_NAME = {
@@ -56,14 +57,14 @@ class VideoContentSafetyFilter(ContentSafetyGuardrail):
         safety_filter_local_path = os.path.join(self.checkpoint_dir, "safety_filter.pt")
         checkpoint = torch.load(safety_filter_local_path, map_location=torch.device("cpu"), weights_only=True)
         self.model.load_state_dict(checkpoint["model"])
-        self.encoder = SigLIPEncoder(device="cuda", dtype=self.dtype)
+        self.encoder = SigLIPEncoder(device=accelerator_device(), dtype=self.dtype)
         if offload_model_to_cpu:
             self.encoder.to("cpu")
             self.model = self.model.to("cpu", dtype=self.dtype).eval()
             log.debug("Moved video content safety filter to CPU")
         else:
-            self.encoder.to("cuda")
-            self.model = self.model.to("cuda", dtype=self.dtype).eval()
+            self.encoder.to(accelerator_device())
+            self.model = self.model.to(accelerator_device(), dtype=self.dtype).eval()
             log.debug("Moved video content safety filter to GPU")
 
     @torch.inference_mode()
@@ -77,8 +78,8 @@ class VideoContentSafetyFilter(ContentSafetyGuardrail):
 
     def _to_cuda_if_offload(self):
         if self.offload_model:
-            self.encoder = self.encoder.to("cuda")
-            self.model = self.model.to("cuda")
+            self.encoder = self.encoder.to(accelerator_device())
+            self.model = self.model.to(accelerator_device())
             log.debug("Move video content safety filter to GPU")
 
     def _to_cpu_if_offload(self):

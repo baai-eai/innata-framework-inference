@@ -318,7 +318,7 @@ def cudnn_sdpa_fwd_generate_op(
     def cudnn_operation(q: Tensor, k: Tensor, v: Tensor, output: Tensor, lse: Tensor | None = None):
         # NOTE: This is INCREDIBLY important to do -- this is what wasted days of my time
         # with random NaNs and illegal memory accesses and things of that nature.
-        stream = torch.cuda.current_stream(q.device)
+        stream = torch.accelerator.current_stream(q.device)
         cudnn.set_stream(handle=handle, stream=stream.cuda_stream)
 
         workspace = torch.zeros(workspace_size_bytes, device=device, dtype=torch.uint8)  # [workspace_size_bytes]

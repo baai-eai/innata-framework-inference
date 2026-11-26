@@ -10,9 +10,10 @@ import time
 import torch
 from omegaconf import OmegaConf
 
-from cosmos_framework.utils.config import Config
 from cosmos_framework.utils import distributed, log
 from cosmos_framework.utils.cluster_env import get_cluster_env
+from cosmos_framework.utils.config import Config
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.easy_io import easy_io
 from cosmos_framework.utils.env_parsers.cred_env_parser import CRED_ENVS
 from cosmos_framework.utils.wandb_util import set_wandb_job_info
@@ -62,7 +63,7 @@ def log_reproducible_setup(config: Config, args: argparse.Namespace) -> None:
     """
 
     run_timestamp = f"{time.strftime('%Y-%m-%d_%H-%M-%S')}"
-    time_tensor = torch.ByteTensor(bytearray(run_timestamp, "utf-8")).cuda()
+    time_tensor = torch.ByteTensor(bytearray(run_timestamp, "utf-8")).to(accelerator_device())
     distributed.broadcast(time_tensor, 0)
     run_timestamp = time_tensor.cpu().numpy().tobytes().decode("utf-8")
 

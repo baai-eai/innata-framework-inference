@@ -28,11 +28,12 @@ def generate_understanding(checkpoint, samples, output_dir: Path) -> None:
 
     from cosmos_framework.inference.common.args import SampleOutput, SampleOutputs
 
-    device = torch.device(os.environ.get("COSMOS_DEVICE", "cuda"))
+    requested = os.environ.get("COSMOS_DEVICE")
+    device = torch.device(requested) if requested else torch.accelerator.current_accelerator(check_available=True)
     if int(os.environ.get("WORLD_SIZE", "1")) != 1:
         raise ValueError("Understanding inference requires a single process")
-    if device.type == "cuda" and not torch.cuda.is_available():
-        raise ValueError("Understanding inference requires CUDA or COSMOS_DEVICE=cpu")
+    if device is None or not torch.get_device_module(device).is_available():
+        raise ValueError("Understanding inference requires an available accelerator or COSMOS_DEVICE=cpu")
     if not samples or any(s.sample_meta.model_mode.value != "reasoner" for s in samples):
         raise ValueError(f"{UNDERSTANDING_CHECKPOINT_NAME} accepts reasoner requests")
 

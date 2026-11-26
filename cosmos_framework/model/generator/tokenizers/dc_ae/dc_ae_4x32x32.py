@@ -7,9 +7,6 @@ from typing import Optional
 
 import torch
 
-from cosmos_framework.utils import log
-from cosmos_framework.utils.distributed import get_rank, sync_model_states
-from cosmos_framework.utils.easy_io import easy_io
 from cosmos_framework.data.generator.utils import VIDEO_RES_SIZE_INFO
 from cosmos_framework.model.generator.tokenizers.dc_ae.dc_ae_v import (
     DCAEV,
@@ -17,6 +14,10 @@ from cosmos_framework.model.generator.tokenizers.dc_ae.dc_ae_v import (
     dc_ae_v_f32t4_encoder_causal_decoder_chunk_causal_4,
 )
 from cosmos_framework.model.generator.tokenizers.interface import VideoTokenizerInterface
+from cosmos_framework.utils import log
+from cosmos_framework.utils.device import accelerator_device
+from cosmos_framework.utils.distributed import get_rank, sync_model_states
+from cosmos_framework.utils.easy_io import easy_io
 
 DEFAULT_MODEL_NAME = "dcae4x32x32_c64_t120_256p_fps_all_encoder_causal_decoder_chunk_causal_4_nogan_cosmos_pad_7_v0.2"
 
@@ -34,11 +35,12 @@ class DCAE4x32x32Interface(VideoTokenizerInterface):
         temporal_compression_factor: int = 4,
         encode_chunk_frames: int = 128,  # Placeholder
         encode_bucket_multiple: int = 2,  # Placeholder
-        device: str = "cuda",
+        device: str | torch.device | None = None,
         compilable: bool = True,
         causal: bool = True,
         encode_exact_durations: Optional[list[int]] = None,
     ):
+        device = accelerator_device() if device is None else device
         self._causal = causal
         assert self._causal, "DCAE4x32x32Interface is a causal tokenizer; causal must be True."
         assert encode_exact_durations is None, "DCAE4x32x32Interface does not support encode_exact_durations."
@@ -138,7 +140,7 @@ class DCAE4x32x32Interface(VideoTokenizerInterface):
                 H, W = VIDEO_RES_SIZE_INFO[resolution][aspect_ratio]
                 log.info(f"Warming up {resolution} {aspect_ratio}")
                 for _ in range(2):
-                    self.model.encode(torch.randn(1, 3, T, H, W).cuda().to(torch.bfloat16))
+                    self.model.encode(torch.randn(1, 3, T, H, W).to(accelerator_device()).to(torch.bfloat16))
 
     @property
     def dtype(self):

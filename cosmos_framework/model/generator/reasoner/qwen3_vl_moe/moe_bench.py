@@ -51,6 +51,7 @@ from cosmos_framework.model.generator.reasoner.qwen3_vl_moe.moe import (
     Qwen3VLMoeTextExpertsGroupedMm,
     Qwen3VLMoeTextExpertsNaive,
 )
+from cosmos_framework.utils.device import accelerator_device
 
 
 @dataclass
@@ -151,17 +152,17 @@ def bench_forward(
     for _ in range(num_warmup):
         with torch.no_grad():
             module(hidden_states, topk_scores, expert_indices, num_tokens_per_expert, token_mask)
-    torch.cuda.synchronize()
+    torch.accelerator.synchronize()
 
-    start = torch.cuda.Event(enable_timing=True)
-    end = torch.cuda.Event(enable_timing=True)
+    start = torch.Event(enable_timing=True)
+    end = torch.Event(enable_timing=True)
 
     start.record()
     for _ in range(num_iters):
         with torch.no_grad():
             module(hidden_states, topk_scores, expert_indices, num_tokens_per_expert, token_mask)
     end.record()
-    torch.cuda.synchronize()
+    torch.accelerator.synchronize()
 
     return start.elapsed_time(end) / num_iters
 
@@ -180,10 +181,10 @@ def bench_backward(
         h = hidden_states.detach().requires_grad_(True)
         out = module(h, topk_scores, expert_indices, num_tokens_per_expert, token_mask)
         out.sum().backward()
-    torch.cuda.synchronize()
+    torch.accelerator.synchronize()
 
-    start = torch.cuda.Event(enable_timing=True)
-    end = torch.cuda.Event(enable_timing=True)
+    start = torch.Event(enable_timing=True)
+    end = torch.Event(enable_timing=True)
 
     start.record()
     for _ in range(num_iters):
@@ -191,7 +192,7 @@ def bench_backward(
         out = module(h, topk_scores, expert_indices, num_tokens_per_expert, token_mask)
         out.sum().backward()
     end.record()
-    torch.cuda.synchronize()
+    torch.accelerator.synchronize()
 
     return start.elapsed_time(end) / num_iters
 
@@ -221,7 +222,7 @@ def profile_run(
 
     for _ in range(num_warmup):
         _step()
-    torch.cuda.synchronize()
+    torch.accelerator.synchronize()
 
     with torch.profiler.profile(
         activities=[
@@ -233,7 +234,7 @@ def profile_run(
     ) as prof:
         for _ in range(num_active):
             _step()
-        torch.cuda.synchronize()
+        torch.accelerator.synchronize()
 
     prof.export_chrome_trace(output_path)
     print(f"\nProfile trace saved to {output_path}")
@@ -254,7 +255,7 @@ def run_single(
     trace_path: str | None = None,
     padding_fraction: float | None = None,
 ) -> BenchResult:
-    device = torch.device("cuda")
+    device = accelerator_device()
     config = Qwen3VLMoeTextConfig(
         hidden_size=hidden_size,
         moe_intermediate_size=moe_intermediate_size,
@@ -271,7 +272,7 @@ def run_single(
         num_tokens, config, device, dtype, padding_fraction
     )
 
-    torch.cuda.reset_peak_memory_stats(device)
+    torch.accelerator.reset_peak_memory_stats(device)
 
     fwd_ms = bench_forward(
         module,
@@ -297,7 +298,7 @@ def run_single(
             num_iters=num_iters,
         )
 
-    peak_mem_mb = torch.cuda.max_memory_allocated(device) / (1024 * 1024)
+    peak_mem_mb = torch.accelerator.max_memory_allocated(device) / (1024 * 1024)
 
     if trace_path is not None:
         profile_run(
@@ -339,7 +340,7 @@ def run_comparison(
     the naive one computes every row and gets to zero from the zero combine weights that
     ``_make_inputs`` puts on the padding. Its time is therefore the cost of not skipping.
     """
-    device = torch.device("cuda")
+    device = accelerator_device()
 
     naive = Qwen3VLMoeTextExpertsNaive(config).to(device=device, dtype=dtype)
     grouped = Qwen3VLMoeTextExpertsGroupedMm(config).to(device=device, dtype=dtype)
@@ -413,7 +414,7 @@ def main(args: BenchConfig) -> None:
         profile_dir = args.profile_dir
         Path(profile_dir).mkdir(parents=True, exist_ok=True)
 
-    gpu_name = torch.cuda.get_device_name(0)
+    gpu_name = torch.get_device_module().get_device_properties(0).name
     print(f"GPU: {gpu_name}")
     padding_str = "none (no token_mask)" if args.padding_fraction is None else f"{args.padding_fraction:.2f}"
     print(f"dtype: {args.dtype}, compile: {args.compile}, padding: {padding_str}")

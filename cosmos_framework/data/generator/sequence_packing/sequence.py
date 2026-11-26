@@ -22,6 +22,7 @@ from cosmos_framework.data.generator.sequence_packing.runtime import (
     SequencePackMetadata,
     prepare_sequence_pack_metadata,
 )
+from cosmos_framework.utils.device import accelerator_device
 
 if TYPE_CHECKING:
     from cosmos_framework.model.generator.utils.data_and_condition import GenerationDataClean
@@ -911,21 +912,22 @@ class PackedSequence:
                 "PackedSequence modality fields must be finalized ModalityData"
             )
 
-    def to_cuda(self) -> None:
-        """Move all tensor fields to CUDA in-place."""
-        self.text_ids = self.text_ids.cuda()
-        self.text_indexes = self.text_indexes.cuda()
-        self.position_ids = self.position_ids.cuda()
+    def to_accelerator(self) -> None:
+        """Move all tensor fields to the active accelerator in-place."""
+        device = accelerator_device()
+        self.text_ids = self.text_ids.to(device)
+        self.text_indexes = self.text_indexes.to(device)
+        self.position_ids = self.position_ids.to(device)
         if isinstance(self.label_ids, torch.Tensor):
-            self.label_ids = self.label_ids.cuda()
+            self.label_ids = self.label_ids.to(device)
         if isinstance(self.ce_loss_indexes, torch.Tensor):
-            self.ce_loss_indexes = self.ce_loss_indexes.cuda()
+            self.ce_loss_indexes = self.ce_loss_indexes.to(device)
         if isinstance(self.ce_loss_weights, torch.Tensor):
-            self.ce_loss_weights = self.ce_loss_weights.cuda()
+            self.ce_loss_weights = self.ce_loss_weights.to(device)
         if self.vision is not None:
-            self.vision.to_cuda()
+            self.vision.to_device(device)
         if self.action is not None:
-            self.action.to_cuda()
+            self.action.to_device(device)
         self.prepare_sequence_pack_metadata()
 
     def prepare_sequence_pack_metadata(self) -> None:

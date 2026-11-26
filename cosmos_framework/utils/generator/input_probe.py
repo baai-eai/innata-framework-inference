@@ -192,7 +192,7 @@ def _hash_named_tensors(
 
 
 def _rng_record() -> dict[str, object]:
-    cuda_states = torch.cuda.get_rng_state_all() if torch.cuda.is_available() else []  # [N_devices][N_state]
+    cuda_states = torch.get_device_module().get_rng_state_all() if torch.accelerator.is_available() else []  # [N_devices][N_state]
     return {
         "python": hashlib.sha256(pickle.dumps(random.getstate())).hexdigest(),
         "numpy": hashlib.sha256(pickle.dumps(np.random.get_state())).hexdigest(),

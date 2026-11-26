@@ -46,6 +46,7 @@ from cosmos_framework.inference.common.public_model_config import (
     restore_model_config_from_public_model_config,
 )
 from cosmos_framework.utils import misc
+from cosmos_framework.utils.device import is_accelerator_device
 from cosmos_framework.utils.flags import SMOKE
 from cosmos_framework.utils.generator.quantization import (
     apply_modelopt_fp8_checkpoint_inplace,
@@ -365,7 +366,7 @@ class _MmapSafeReadMixin:
         if target_tensor.size() != tensor.size():
             raise AssertionError(f"req {req.storage_index} mismatch sizes {target_tensor.size()} vs {tensor.size()}")
 
-        if target_tensor.is_cuda and self._materialize_enabled():
+        if is_accelerator_device(target_tensor.device) and self._materialize_enabled():
             # Materialise into anonymous host memory before the H2D copy.
             #
             # The base implementation copies straight from mmap-backed safetensors

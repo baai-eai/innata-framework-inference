@@ -20,6 +20,7 @@ import torch
 
 from cosmos_framework.model.tokenizer.models.modules import BACKEND, DEBUG
 from cosmos_framework.model.tokenizer.utils.tensors import cat_with_bounded_inputs
+from cosmos_framework.utils.device import accelerator_device
 
 SparseTensorData = None  # Lazy import
 
@@ -588,7 +589,7 @@ class SparseTensor:
         elif isinstance(device, torch.device):
             target_device = device
         elif isinstance(device, int):
-            target_device = torch.device("cuda", device)
+            target_device = accelerator_device(device)
         else:
             target_device = torch.device(device)
 
@@ -619,7 +620,7 @@ class SparseTensor:
         return self.to(device=torch.device("cpu"))
 
     def cuda(self) -> "SparseTensor":
-        return self.to(device=torch.device("cuda"))
+        return self.to(device=accelerator_device())
 
     def half(self) -> "SparseTensor":
         new_feats = self.feats.half()

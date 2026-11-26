@@ -117,24 +117,24 @@ class ModalityData:
         assert isinstance(self.timesteps, torch.Tensor), "ModalityData.timesteps must be finalized"
         assert isinstance(self.mse_loss_indexes, torch.Tensor), "ModalityData.mse_loss_indexes must be finalized"
 
-    def to_cuda(self) -> None:
-        """Move all tensor fields to CUDA in-place."""
-        self.robot_state_token_indexes = self.robot_state_token_indexes.cuda()
-        self.sequence_indexes = self.sequence_indexes.cuda()
-        self.timesteps = self.timesteps.cuda()
-        self.mse_loss_indexes = self.mse_loss_indexes.cuda()
-        self.tokens = [token.cuda() for token in self.tokens]
-        self.condition_mask = [cm.cuda() for cm in self.condition_mask]
-        self.noisy_frame_indexes = [ni.cuda() for ni in self.noisy_frame_indexes]
-        self.domain_id = [d.cuda() for d in self.domain_id]
+    def to_device(self, device: torch.device) -> None:
+        """Move all tensor fields to the given device in-place."""
+        self.robot_state_token_indexes = self.robot_state_token_indexes.to(device)
+        self.sequence_indexes = self.sequence_indexes.to(device)
+        self.timesteps = self.timesteps.to(device)
+        self.mse_loss_indexes = self.mse_loss_indexes.to(device)
+        self.tokens = [token.to(device) for token in self.tokens]
+        self.condition_mask = [cm.to(device) for cm in self.condition_mask]
+        self.noisy_frame_indexes = [ni.to(device) for ni in self.noisy_frame_indexes]
+        self.domain_id = [d.to(device) for d in self.domain_id]
         if self.loss_valid_mask is not None:
-            self.loss_valid_mask = [m.cuda() for m in self.loss_valid_mask]
+            self.loss_valid_mask = [m.to(device) for m in self.loss_valid_mask]
         if self.input_valid_mask is not None:
-            self.input_valid_mask = [m.cuda() for m in self.input_valid_mask]
+            self.input_valid_mask = [m.to(device) for m in self.input_valid_mask]
         # raw_action_dim is optional (e.g., when action-channel masking is disabled).
         if self.raw_action_dim is not None:
             # Action128 publishes an integer width; legacy batches may use a tensor.
-            self.raw_action_dim = [d.cuda() if isinstance(d, torch.Tensor) else d for d in self.raw_action_dim]
+            self.raw_action_dim = [d.to(device) if isinstance(d, torch.Tensor) else d for d in self.raw_action_dim]
 
 
 def prepare_attention_mask_per_sample(split_lens, attn_modes, device="cpu"):

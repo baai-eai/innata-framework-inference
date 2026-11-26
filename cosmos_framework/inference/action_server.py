@@ -25,6 +25,7 @@ from cosmos_framework.inference.action_serving import (
     prepare_wam_request,
     resolve_checkpoint,
 )
+from cosmos_framework.utils.device import accelerator_device
 
 
 def parser() -> argparse.ArgumentParser:
@@ -191,9 +192,9 @@ class DistributedActionService:
         from cosmos_framework.utils import misc
 
         # FastAPI's synchronous route executes on a thread. CUDA device is thread-local.
-        torch.cuda.set_device(int(os.environ.get("LOCAL_RANK", "0")))
+        torch.accelerator.set_device_index(int(os.environ.get("LOCAL_RANK", "0")))
         start = time.monotonic()
-        batch = misc.to(batch, device="cuda")
+        batch = misc.to(batch, device=accelerator_device())
         with torch.inference_mode():
             sampling = {}
             if request.sample_args:
@@ -424,10 +425,10 @@ def main(sft_profile=None) -> None:
     from cosmos_framework.inference.args import OmniSetupOverrides
     from cosmos_framework.inference.inference import OmniInference
 
-    if not torch.cuda.is_available():
+    if not torch.accelerator.is_available():
         raise RuntimeError("Action128 serving requires CUDA GPUs")
     local_rank = int(os.environ.get("LOCAL_RANK", "0"))
-    torch.cuda.set_device(local_rank)
+    torch.accelerator.set_device_index(local_rank)
     initialize_single_rank_distributed()
     # Idle serving waits on a CPU group, avoiding NCCL timeout while no request arrives.
     group = dist.new_group(backend="gloo", timeout=timedelta(days=7))

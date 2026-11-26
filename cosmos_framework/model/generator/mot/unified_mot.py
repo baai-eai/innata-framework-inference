@@ -2225,7 +2225,7 @@ def _impl_generate_reasoner_text(
     if eos_tensor is not None:
         finished |= (next_token.unsqueeze(-1) == eos_tensor).any(dim=-1)
 
-    torch.cuda.synchronize()
+    torch.accelerator.synchronize()
     _prefill_time = time.time() - _prefill_start
     log.info(f"[generate_reasoner_text] prefill time: {_prefill_time:.2f} sec")
 
@@ -2301,7 +2301,7 @@ def _impl_generate_reasoner_text(
 
     new_tokens_tensor = output_buf[:, :num_generated]  # [B,T_new]
 
-    torch.cuda.synchronize()
+    torch.accelerator.synchronize()
     _decode_time = time.time() - _decode_start
     log.info(f"[generate_reasoner_text] decode time: {_decode_time:.2f} sec, number of tokens: {num_generated}")
     log.info(f"[generate_reasoner_text] average decode time per token: {_decode_time * 1e3 / num_generated:.2f} ms")

@@ -1438,8 +1438,8 @@ def _get_device_memory_bytes() -> int:
         # Fallback for unified memory architectures (e.g., GB10) where
         # nvmlDeviceGetMemoryInfo is not supported.
         import torch
-        if torch.cuda.is_available():
-            return int(torch.cuda.get_device_properties(0).total_memory)
+        if torch.accelerator.is_available():
+            return int(torch.get_device_module().get_device_properties(0).total_memory)
         return 128 * 1024**3  # Default 128GB
     finally:
         try:

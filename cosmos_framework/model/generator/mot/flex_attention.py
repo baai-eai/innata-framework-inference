@@ -643,7 +643,7 @@ def flash_backend_block_size(device: torch.device) -> tuple[int, int]:
         return (128, 128)
     raise ValueError(
         f"The FlashAttention-4 backend supports Hopper (sm90) and Blackwell (sm100+) only, "
-        f"got sm{major}{minor} ({torch.cuda.get_device_name(device)}); use the Triton backend there."
+        f"got sm{major}{minor} ({torch.get_device_module().get_device_properties(device).name}); use the Triton backend there."
     )
 
 

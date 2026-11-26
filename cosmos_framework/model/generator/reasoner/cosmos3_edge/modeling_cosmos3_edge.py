@@ -194,10 +194,10 @@ class Cosmos3EdgeBlock(nn.Module):
     ) -> torch.Tensor:
         # The remote code pins the block to the CUDA default stream ("avoid NaN issues
         # when using multiple GPUs"); nullcontext off-CUDA so the port also runs on CPU.
-        if hidden_states.device.type == "cuda":
-            stream_ctx = torch.cuda.stream(torch.cuda.default_stream(hidden_states.device))
-        else:
-            stream_ctx = contextlib.nullcontext()
+        stream_ctx = contextlib.nullcontext()
+        backend = torch.get_device_module(hidden_states.device)
+        if hasattr(backend, "default_stream"):
+            stream_ctx = backend.default_stream(hidden_states.device)
         with stream_ctx:
             residual = hidden_states
             hidden_states = self.norm(hidden_states.to(dtype=self.norm.weight.dtype))

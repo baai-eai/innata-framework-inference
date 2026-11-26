@@ -59,6 +59,7 @@ from cosmos_framework.model.generator.upsampler.prompts import is_upsampled_prom
 from cosmos_framework.tools.visualize.video import save_img_or_video
 from cosmos_framework.utils import log
 from cosmos_framework.utils.checkpoint_db import CheckpointDirHf
+from cosmos_framework.utils.device import accelerator_device
 
 if TYPE_CHECKING:
     from cosmos_framework.configs.base.defaults.model_config import OmniMoTModelConfig
@@ -644,7 +645,7 @@ def get_sample_data(
     sample_args: OmniSampleArgs,
     model: OmniMoTModel,
     *,
-    device: Any = "cuda",
+    device: Any = None,
 ) -> dict:
     """Create a sample batch for generation."""
     if sample_args.model_mode.is_reasoner:
@@ -652,6 +653,8 @@ def get_sample_data(
 
     if sample_args.transfer_hints:
         return {}
+
+    device = accelerator_device() if device is None else device
 
     if sample_args.model_mode.is_action:
         from cosmos_framework.inference.action import get_action_sample_data
@@ -1128,7 +1131,7 @@ class SampleDataset(Dataset):
         sample_args = self._sample_args_list[idx]
         assert isinstance(sample_args, OmniSampleArgs)
         assert sample_args.output_dir is not None
-        data_batch = sample_args.get_data(device="cuda")
+        data_batch = sample_args.get_data(device=accelerator_device())
         if not data_batch:
             data_batch = get_sample_data(sample_args=sample_args, model=self._model)
         return sample_args, data_batch
@@ -1138,7 +1141,7 @@ class SampleDataset(Dataset):
 class OmniInference(Inference):
     # pyrefly: ignore[bad-override]
     model: OmniMoTModel
-    vae_decode_stream: torch.cuda.Stream | None = None
+    vae_decode_stream: torch.Stream | None = None
 
     @property
     def model_config(self) -> "OmniMoTModelConfig":
@@ -1264,7 +1267,7 @@ class OmniInference(Inference):
                 model.set_up_scheduler_and_sampler()
                 log.debug(f"Sampler overridden to: {sampler_override}")
 
-        vae_decode_stream: torch.cuda.Stream | None = None
+        vae_decode_stream: torch.Stream | None = None
         vision_tokenizer = model.tokenizer_vision_gen
         if setup_args.use_separate_pipeline_vision_decode_gpu and vision_tokenizer is None:
             log.info("Separate vision decode GPU setup skipped because the generation vision tokenizer is not loaded")
@@ -1278,16 +1281,16 @@ class OmniInference(Inference):
             is_vae_output_rank = (replica_size <= 1) or (get_rank() % replica_size == 0)
 
             vae_device_index = setup_args.cp_size * setup_args.cfgp_size
-            if torch.cuda.device_count() <= vae_device_index:
+            if torch.accelerator.device_count() <= vae_device_index:
                 raise RuntimeError(
                     "--use-separate-pipeline-vision-decode-gpu requires a spare visible local GPU on the "
                     "same node as the decode-owning rank, but the configured local decode GPU index "
-                    f"{vae_device_index} is unavailable with only {torch.cuda.device_count()} visible local GPUs."
+                    f"{vae_device_index} is unavailable with only {torch.accelerator.device_count()} visible local GPUs."
                 )
             if is_vae_output_rank:
-                vae_device = torch.device("cuda", vae_device_index)
-                inference_device = torch.device("cuda", torch.cuda.current_device())
-                vae_decode_stream = torch.cuda.Stream(device=vae_device)
+                vae_device = accelerator_device(vae_device_index)
+                inference_device = accelerator_device(torch.accelerator.current_device_index())
+                vae_decode_stream = torch.Stream(device=vae_device)
                 vae = vision_tokenizer.model
                 vae.device = str(vae_device)
                 vae.model = vae.model.to(device=vae_device)
@@ -1400,7 +1403,7 @@ class OmniInference(Inference):
         # the same local batch count, so a global MAX all-reduce is sufficient
         # to align all replicas.
         if torch.distributed.is_initialized() and self.num_replicas > 1:
-            count_tensor = torch.tensor([num_local_batches], dtype=torch.long, device="cuda")
+            count_tensor = torch.tensor([num_local_batches], dtype=torch.long, device=accelerator_device())
             torch.distributed.all_reduce(count_tensor, op=torch.distributed.ReduceOp.MAX)
             global_max_batches = int(count_tensor.item())
         else:
@@ -1546,10 +1549,10 @@ class OmniInference(Inference):
                 vision = self.model.decode(vision_latent)  # [B,C,T,H,W]
                 return ((1.0 + vision) / 2).clamp(0, 1)  # [B,C,T,H,W]
             # We are using a separate GPU for VAE decoding, so we need to issue decode on the VAE device
-            vision_ready = torch.cuda.Event()
-            torch.cuda.current_stream(device=vision_latent.device).record_event(vision_ready)
+            vision_ready = torch.Event()
+            torch.accelerator.current_stream(vision_latent.device).record_event(vision_ready)
             self.vae_decode_stream.wait_event(vision_ready)
-            with torch.cuda.stream(self.vae_decode_stream):
+            with self.vae_decode_stream:
                 vision = self.model.decode(vision_latent)  # [B,C,T,H,W]
                 return ((1.0 + vision) / 2).clamp(0, 1)  # [B,C,T,H,W]
 
@@ -1675,7 +1678,7 @@ class OmniInference(Inference):
                 outputs["vision"] = [cast(torch.Tensor, vision) for vision in decoded_vision]
                 if self.vae_decode_stream is not None:
                     # If we are using a separate GPU for VAE decoding, wait for results to be ready
-                    torch.cuda.current_stream(device=outputs["vision"][0].device).wait_stream(self.vae_decode_stream)
+                    torch.accelerator.current_stream(outputs["vision"][0].device).wait_stream(self.vae_decode_stream)
         for k, v in outputs.items():
             if len(v) != len(sample_args_list):
                 raise ValueError(f"Output key '{k}' has length {len(v)} but expected {len(sample_args_list)}")

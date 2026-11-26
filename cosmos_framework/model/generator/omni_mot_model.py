@@ -90,7 +90,7 @@ from cosmos_framework.model.generator.utils.safetensors_loader import (
 )
 from cosmos_framework.utils import log, misc
 from cosmos_framework.utils.count_params import count_params
-from cosmos_framework.utils.flags import DEVICE, TRAINING, Device
+from cosmos_framework.utils.flags import DEVICE, TRAINING
 from cosmos_framework.utils.generator.data_utils import get_vision_data_resolution, read_positive_int_metadata
 from cosmos_framework.utils.generator.dtensor_helper import DTensorFastEmaModelUpdater
 from cosmos_framework.utils.generator.model_weights_stats import WeightTrainingStat
@@ -446,10 +446,10 @@ class OmniMoTModel(ImaginaireModel):
             attention_io_layout=getattr(self.config, "attention_io_layout", "sequence_sharded"),
         )
 
-        with misc.timer("meta to cuda and broadcast model states"):
+        with misc.timer("move model from meta and broadcast model states"):
             net = net.to(dtype=dtype)
             net.to_empty(device=DEVICE)
-            if DEVICE == Device.CUDA:
+            if torch.device(DEVICE).type not in ("cpu", "meta"):
                 # Weight initialization is not needed for other devices (cpu,
                 # meta), since they are only for checkpoint conversion and smoke
                 # tests.
@@ -582,7 +582,7 @@ class OmniMoTModel(ImaginaireModel):
 
         self.set_up_memory()
 
-        torch.cuda.empty_cache()
+        torch.accelerator.empty_cache()
 
     def install_attention_dispatch(self, net: torch.nn.Module) -> None:
         """Install a custom attention dispatch function on the network.
@@ -611,7 +611,7 @@ class OmniMoTModel(ImaginaireModel):
             cfgp=self.config.parallelism.cfg_parallel_shard_degree,
             cp=self.config.parallelism.context_parallel_shard_degree,
         )
-        self.parallel_dims.build_meshes(device_type=DEVICE)
+        self.parallel_dims.build_meshes(device_type=torch.device(DEVICE).type)
 
     def set_up_scheduler_and_sampler(self):
         # Get shift values - support both int and dict-based resolution lookup.
@@ -1364,7 +1364,7 @@ class OmniMoTModel(ImaginaireModel):
                 "Understanding training batch is missing collator-prepared packed_sequence; "
                 "construct the dataloader through the Parquet TOML training path."
             )
-        packed_sequence.to_cuda()
+        packed_sequence.to_accelerator()
         out_net = self.denoise(data_batch_packed=packed_sequence, vlm_inputs=vlm_inputs)
         ce_preds = out_net.get("ce_preds")
         if ce_preds is None:
@@ -1586,8 +1586,8 @@ class OmniMoTModel(ImaginaireModel):
         # in CPU workers.  Binding swaps in CUDA VAE/action payloads but leaves
         # masks and indexes on CPU, so move the complete sequence before any
         # pre-noise hook or flow-matching arithmetic consumes both together.
-        with nvtx_range("forward.packed_sequence_to_cuda"):
-            packed_sequence.to_cuda()
+        with nvtx_range("forward.packed_sequence_to_accelerator"):
+            packed_sequence.to_accelerator()
 
         with nvtx_range("forward.pre_noise_memory"):
             memory_info = self.pre_noise_memory_hook(packed_sequence, gen_data_clean, memory_info)
@@ -3039,7 +3039,7 @@ class OmniMoTModel(ImaginaireModel):
                 assert packed_sequence.sound is not None, "packed_sequence.sound must exist when has_sound is True"
                 packed_sequence.sound.tokens = [x.to(**self.tensor_kwargs) for x in noise_x_sound]  # list[[C_sound,T]]
 
-            packed_sequence.to_cuda()
+            packed_sequence.to_accelerator()
         else:
             packed_sequence = self._update_inference_pack_template(
                 packed_sequence_template,
@@ -3454,7 +3454,7 @@ class OmniMoTModel(ImaginaireModel):
                 skip_text_tokens=False,
                 **self._input_sequence_options(),
             )
-            cond_packed_sequence_template.to_cuda()
+            cond_packed_sequence_template.to_accelerator()
             if guidance != 1.0 or velocity_postprocess_builder is not None:
                 uncond_packed_sequence_template = prepare_inference_sequence(
                     sequence_plans=sequence_plans,
@@ -3465,7 +3465,7 @@ class OmniMoTModel(ImaginaireModel):
                     skip_text_tokens=skip_text_tokens_for_cfg,
                     **self._input_sequence_options(),
                 )
-                uncond_packed_sequence_template.to_cuda()
+                uncond_packed_sequence_template.to_accelerator()
 
         # Optional per-step velocity postprocess hook. Built once via a builder
         # that receives the prepared inference state. The returned callable (if
@@ -5739,7 +5739,7 @@ class OmniMoTModel(ImaginaireModel):
         if pad_raw is None:
             pad_raw = eos_raw
         pad_id: int | None = int(pad_raw) if pad_raw is not None else None
-        device = self.tensor_kwargs.get("device", "cuda")
+        device = self.tensor_kwargs.get("device", DEVICE)
 
         outputs: list[str] = []
         for idx, prompt in enumerate(inputs):

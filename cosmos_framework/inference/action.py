@@ -29,6 +29,7 @@ from cosmos_framework.data.generator.action.utils.transforms import (
 )
 from cosmos_framework.inference.args import ModelMode
 from cosmos_framework.inference.vision import read_media_frames
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.generator.data_utils import get_vision_data_resolution
 
 # Domains whose raw action width is chosen per dataset at construction time rather than
@@ -108,10 +109,11 @@ def build_action_batch(
     resolution: str | None = None,
     input_video_key: str,
     batch_size: int = 1,
-    device: Any = "cuda",
+    device: Any = None,
     legacy_forward_dynamics: bool = False,
 ) -> dict:
     """Build an Action data batch from pre-loaded video and action tensors."""
+    device = accelerator_device() if device is None else device
     target_frames = action_chunk_size + 1
     _, num_frames, h, w = video.shape
 

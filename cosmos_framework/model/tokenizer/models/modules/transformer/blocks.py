@@ -31,6 +31,7 @@ from cosmos_framework.model.tokenizer.models.modules.sparse_ops import (
     SparseSiLU,
 )
 from cosmos_framework.model.tokenizer.models.modules.sparse_tensor import SparseTensor
+from cosmos_framework.utils.device import is_accelerator_device
 
 __all__ = [
     "AbsolutePositionEmbedder",
@@ -652,7 +653,7 @@ class LearnedPositionEmbedder(nn.Module):
                 pos_emb = pos_emb.to(device=target_device, dtype=compute_dtype)
             use_fast_backward = bool(
                 self.fast_upsample_backward
-                and pos_emb.is_cuda
+                and is_accelerator_device(pos_emb.device)
                 and pos_emb.dtype == torch.bfloat16
                 and pos_emb.requires_grad
                 and torch.is_grad_enabled()

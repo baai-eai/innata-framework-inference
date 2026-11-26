@@ -23,6 +23,7 @@ from cosmos_framework.data.generator.sequence_packing.runtime import (
     get_gen_seq,
     get_und_seq,
 )
+from cosmos_framework.utils.device import is_accelerator_device
 
 _compiled_flex = torch.compile(flex_attention, dynamic=False)
 
@@ -134,7 +135,7 @@ def joint_flex_attention(qs, ks, vs, block_mask, *, scale=None):
     """One Flex call for both streams. Inputs/outputs use [S,H,D]."""
     und_requires_grad = any(t.requires_grad for t in (qs[0], ks[0], vs[0]))
     q, k, v = [torch.cat(parts).transpose(0, 1).unsqueeze(0) for parts in (qs, ks, vs)]
-    fn = _compiled_flex if q.is_cuda else flex_attention
+    fn = _compiled_flex if is_accelerator_device(q.device) else flex_attention
     y = fn(
         q,
         k,
@@ -151,7 +152,7 @@ def joint_flex_attention(qs, ks, vs, block_mask, *, scale=None):
 
 
 def _split_flex(qs, ks, vs, metadata, scale):
-    fn = _compiled_flex if qs[0].is_cuda else flex_attention
+    fn = _compiled_flex if is_accelerator_device(qs[0].device) else flex_attention
     outputs = []
     for i in range(2):
         q = qs[i].transpose(0, 1).unsqueeze(0)

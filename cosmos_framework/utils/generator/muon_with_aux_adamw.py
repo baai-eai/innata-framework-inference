@@ -62,7 +62,7 @@ import transformer_engine_torch as tex
 from torch.distributed.tensor import DTensor, Replicate
 
 from cosmos_framework.utils import log
-from cosmos_framework.utils.misc import get_local_tensor_if_DTensor
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.generator.aux_optimizer_utils import (
     compute_pre_ns_update,
     create_moe_megabatches,
@@ -72,6 +72,7 @@ from cosmos_framework.utils.generator.aux_optimizer_utils import (
     validate_split_expert_ns_config,
     zeropower_via_newtonschulz5,
 )
+from cosmos_framework.utils.misc import get_local_tensor_if_DTensor
 
 
 class MuonWithAuxAdamW(torch.optim.Optimizer):
@@ -191,7 +192,7 @@ class MuonWithAuxAdamW(torch.optim.Optimizer):
         # Transformer Engine fused Adam for AdamW params. The zero buffer is the
         # noop flag required as the second argument of TE's multi_tensor_applier;
         # it is a fixed constant here (no AMP overflow handling).
-        self._dummy_overflow_buf = torch.tensor([0], dtype=torch.int, device="cuda")
+        self._dummy_overflow_buf = torch.tensor([0], dtype=torch.int, device=accelerator_device())
         self._multi_tensor_adam = tex.multi_tensor_adam
         self._multi_tensor_adam_capturable = tex.multi_tensor_adam_capturable
         self._multi_tensor_adam_capturable_master = tex.multi_tensor_adam_capturable_master
@@ -815,7 +816,7 @@ class MuonWithAuxAdamW(torch.optim.Optimizer):
         self.param_groups_master = None
 
         for group in self.param_groups:
-            device = group["params"][0].device if group["params"] else "cuda"
+            device = group["params"][0].device if group["params"] else accelerator_device()
             if self.capturable:
                 if isinstance(group["lr"], torch.Tensor):
                     group["lr"] = group["lr"].to(device=device)

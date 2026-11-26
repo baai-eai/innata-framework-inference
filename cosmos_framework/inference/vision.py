@@ -13,6 +13,7 @@ from PIL import Image
 
 from cosmos_framework.data.generator.sequence_packing import SequencePlan
 from cosmos_framework.data.generator.utils import VIDEO_RES_SIZE_INFO
+from cosmos_framework.utils.device import accelerator_device
 
 
 def build_video_sequence_plans(
@@ -159,17 +160,17 @@ def build_conditioned_video_batch(
         video_data[0, :, t_fill:, :, :] = video_data[0, :, t_fill - 1 : t_fill, :, :].expand(
             -1, num_frames - t_fill, -1, -1
         )  # [3,num_frames-t_fill,h,w]
-    video_list = [video_data.cuda() for _ in range(batch_size)]  # list of [1,3,num_frames,h,w]
-    image_size = [torch.tensor([[h, w, h, w]], dtype=torch.float32).cuda() for _ in range(batch_size)]  # list of [1,4]
+    video_list = [video_data.to(accelerator_device()) for _ in range(batch_size)]  # list of [1,3,num_frames,h,w]
+    image_size = [torch.tensor([[h, w, h, w]], dtype=torch.float32).to(accelerator_device()) for _ in range(batch_size)]  # list of [1,4]
     sequence_plans = build_video_sequence_plans(condition_frames_vision, batch_size=batch_size)
     return {
         "dataset_name": "video_data",
         "video": video_list,
         "image_size": image_size,
-        "t5_text_embeddings": torch.randn(batch_size, 512, 1024).cuda().to(dtype=torch.bfloat16),  # [B,512,1024]
-        "fps": torch.full((batch_size,), float(fps)).cuda(),  # [B]
-        "conditioning_fps": torch.full((batch_size,), float(fps)).cuda(),  # [B]
-        "num_frames": torch.full((batch_size,), num_frames).cuda(),  # [B]
+        "t5_text_embeddings": torch.randn(batch_size, 512, 1024).to(accelerator_device()).to(dtype=torch.bfloat16),  # [B,512,1024]
+        "fps": torch.full((batch_size,), float(fps)).to(accelerator_device()),  # [B]
+        "conditioning_fps": torch.full((batch_size,), float(fps)).to(accelerator_device()),  # [B]
+        "num_frames": torch.full((batch_size,), num_frames).to(accelerator_device()),  # [B]
         "is_preprocessed": True,
         "sequence_plan": sequence_plans,
     }
@@ -182,16 +183,16 @@ def build_image_edit_batch(
     batch_size: int = 1,
 ) -> dict:
     """Build a data batch for image-to-image editing."""
-    image = conditioning_frames.unsqueeze(0).cuda().to(dtype=torch.bfloat16)  # [1,3,1,h,w]
+    image = conditioning_frames.unsqueeze(0).to(accelerator_device()).to(dtype=torch.bfloat16)  # [1,3,1,h,w]
     sequence_plans = [
         SequencePlan(has_text=True, has_vision=True, condition_frame_indexes_vision=[]) for _ in range(batch_size)
     ]
-    image_size = torch.tensor([[h, w, h, w]], dtype=torch.float32).cuda()  # [1,4]
+    image_size = torch.tensor([[h, w, h, w]], dtype=torch.float32).to(accelerator_device())  # [1,4]
     return {
         "dataset_name": "image_data",
         "images": [image, image] * batch_size,
         "image_size": [image_size, image_size] * batch_size,
-        "num_frames": [torch.tensor([2], dtype=torch.int64).cuda() for _ in range(batch_size)],  # list of [1]
+        "num_frames": [torch.tensor([2], dtype=torch.int64).to(accelerator_device()) for _ in range(batch_size)],  # list of [1]
         "num_vision_items_per_sample": [2 for _ in range(batch_size)],
         "is_preprocessed": True,
         "sequence_plan": sequence_plans,

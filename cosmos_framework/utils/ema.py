@@ -18,6 +18,7 @@ except ImportError:
     USE_MEGATRON = False
 
 from cosmos_framework.utils import distributed, log
+from cosmos_framework.utils.device import accelerator_device
 
 if TYPE_CHECKING:
     from cosmos_framework.model._base import ImaginaireModel
@@ -58,7 +59,7 @@ class FastEmaModelUpdater:
             parameters (iterable): Iterable of torch.nn.Parameter to be temporarily stored.
         """
         assert self.is_cached is False, "EMA cache is already taken. Did you forget to restore it?"
-        device = "cpu" if is_cpu else "cuda"
+        device = "cpu" if is_cpu else str(accelerator_device())
         self.collected_params = [param.clone().to(device) for param in parameters]
         self.is_cached = True
 
@@ -164,7 +165,7 @@ class EMAModelTracker(torch.nn.Module):
             parameters (iterable): Iterable of torch.nn.Parameter to be temporarily stored.
         """
         assert self.is_cached is False, "EMA cache is already taken. Did you forget to restore it?"
-        device = "cpu" if is_cpu else "cuda"
+        device = "cpu" if is_cpu else str(accelerator_device())
         self.collected_params = [param.clone().to(device) for param in parameters]
         self.is_cached = True
 

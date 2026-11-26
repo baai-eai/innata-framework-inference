@@ -129,7 +129,7 @@ def maybe_enable_memory_snapshot(config, *, global_step: int = 0):
         profiler = MemoryProfiler(global_step, config.trainer.profiling.profile_freq)
         try:
             yield profiler
-        except torch.cuda.OutOfMemoryError:
+        except torch.OutOfMemoryError:
             # Dump what the allocator was holding when it ran out, then let the OOM keep going.
             # Swallowing it would end the train loop and return from trainer.train() normally, so
             # the process would exit 0 and a run truncated at iteration 3 would be indistinguishable

@@ -288,7 +288,7 @@ def _receive_results(results, ready, done, device, stats):
     if device is not None:
         try:
             torch.set_num_threads(1)
-            torch.cuda.set_device(device)
+            torch.accelerator.set_device_index(device)
         except BaseException:
             put((None, None, "Pin memory thread initialization failed:\n" + traceback.format_exc()))
             return
@@ -645,7 +645,7 @@ class SharedPrefetchDataLoader(JointCosmosDataLoader):
                 # Credits remain in _tasks until delivery, including batches
                 # in this queue, so this stage does not add another K window.
                 self._pin_in_background = (
-                    self.pin_memory and self.pin_memory_in_background and torch.cuda.is_available()
+                    self.pin_memory and self.pin_memory_in_background and torch.accelerator.is_available()
                 )
                 if self.receive_in_background or self._pin_in_background:
                     self._received_results = queue.Queue(maxsize=self.prefetch_factor)
@@ -655,7 +655,7 @@ class SharedPrefetchDataLoader(JointCosmosDataLoader):
                             self._results,
                             self._received_results,
                             self._results_done,
-                            torch.cuda.current_device() if self._pin_in_background else None,
+                            torch.accelerator.current_device_index() if self._pin_in_background else None,
                             self._pin_stats,
                         ),
                         name="cosmos-data-pin" if self._pin_in_background else "cosmos-data-receive",
@@ -818,7 +818,7 @@ class SharedPrefetchDataLoader(JointCosmosDataLoader):
             global_id, source, worker, next_worker = task
             resume_rng = batch.pop("_cosmos_resume_rng", None)
             # Pin only model-facing data, not CPU checkpoint metadata.
-            if self.pin_memory and not self._pin_in_background and torch.cuda.is_available():
+            if self.pin_memory and not self._pin_in_background and torch.accelerator.is_available():
                 pin_started = time.perf_counter()
                 batch = pin_memory(batch)
                 self._inline_pin_seconds += time.perf_counter() - pin_started

@@ -15,6 +15,7 @@ import wandb.util
 from omegaconf import DictConfig
 
 from cosmos_framework.utils import distributed, log, object_store
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.easy_io import easy_io
 from cosmos_framework.utils.launch_defaults import get_wandb_entity, get_wandb_project
 from cosmos_framework.utils.lazy_config.lazy import LazyConfig
@@ -163,7 +164,7 @@ def _broadcast_wandb_init_status(rank0_failed: bool) -> bool:
     if not torch.distributed.is_available() or not torch.distributed.is_initialized():
         return rank0_failed
     backend = torch.distributed.get_backend()
-    device = torch.device("cuda", torch.cuda.current_device()) if backend == "nccl" else torch.device("cpu")
+    device = accelerator_device(torch.accelerator.current_device_index()) if backend == "nccl" else torch.device("cpu")
     status = torch.tensor([int(rank0_failed)], dtype=torch.int32, device=device)
     torch.distributed.broadcast(status, src=0)
     return bool(status.item())

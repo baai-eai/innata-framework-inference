@@ -10,11 +10,11 @@ from transformers import SiglipModel, SiglipProcessor
 class SigLIPEncoder(torch.nn.Module):
     def __init__(
         self,
-        device="cuda" if torch.cuda.is_available() else "cpu",  # noqa: B008
+        device=None,
         dtype=torch.float32,
     ) -> None:
         super().__init__()
-        self.device = device
+        self.device = (torch.accelerator.current_accelerator(check_available=True) or "cpu") if device is None else device
         self.dtype = dtype
         model_id = "google/siglip-so400m-patch14-384"
         self.model = SiglipModel.from_pretrained(model_id)

@@ -18,6 +18,7 @@ import tqdm
 import wandb
 
 from cosmos_framework.utils import distributed, log, misc, wandb_util
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.lazy_config import instantiate
 from cosmos_framework.utils.misc import get_local_tensor_if_DTensor
 from cosmos_framework.utils.nvtx import (
@@ -469,7 +470,7 @@ class WandBCallback(Callback):
             timer_results = self.trainer.training_timer.compute_average_results()
 
             # reduce loss
-            sample_size = torch.tensor(misc.get_data_batch_size(data_batch), device="cuda")
+            sample_size = torch.tensor(misc.get_data_batch_size(data_batch), device=accelerator_device())
             loss_sum = loss * sample_size
             dist.all_reduce(loss_sum, op=dist.ReduceOp.SUM)
             dist.all_reduce(sample_size, op=dist.ReduceOp.SUM)
@@ -488,8 +489,8 @@ class WandBCallback(Callback):
         self._val_cache: dict[str, Any] = dict(
             data_batches=[],
             output_batches=[],
-            loss=torch.tensor(0.0, device="cuda"),
-            sample_size=torch.tensor(0, device="cuda"),
+            loss=torch.tensor(0.0, device=accelerator_device()),
+            sample_size=torch.tensor(0, device=accelerator_device()),
         )
 
     def on_validation_step_end(
@@ -780,7 +781,7 @@ class NVTXCallback(Callback):
 
     def on_before_forward(self, iteration: int = 0) -> None:
         if self.synchronize:
-            torch.cuda.synchronize()
+            torch.accelerator.synchronize()
         torch.cuda.nvtx.range_push("forward")
         if self._detail_enabled:
             torch.cuda.nvtx.range_push(f"cosmos.{self._context_name(iteration)}.forward")
@@ -788,7 +789,7 @@ class NVTXCallback(Callback):
     def on_after_forward(self, iteration: int = 0) -> None:
         del iteration
         if self.synchronize:
-            torch.cuda.synchronize()
+            torch.accelerator.synchronize()
         if self._detail_enabled:
             torch.cuda.nvtx.range_pop()
         torch.cuda.nvtx.range_pop()
@@ -796,7 +797,7 @@ class NVTXCallback(Callback):
     def on_before_backward(self, model: ImaginaireModel, loss: torch.Tensor, iteration: int = 0) -> None:
         del model, loss
         if self.synchronize:
-            torch.cuda.synchronize()
+            torch.accelerator.synchronize()
         torch.cuda.nvtx.range_push("backward")
         if self._detail_enabled:
             torch.cuda.nvtx.range_push(f"cosmos.{self._context_name(iteration)}.backward")
@@ -804,7 +805,7 @@ class NVTXCallback(Callback):
     def on_after_backward(self, model: ImaginaireModel, iteration: int = 0) -> None:
         del model, iteration
         if self.synchronize:
-            torch.cuda.synchronize()
+            torch.accelerator.synchronize()
         if self._detail_enabled:
             torch.cuda.nvtx.range_pop()
         torch.cuda.nvtx.range_pop()
@@ -819,7 +820,7 @@ class NVTXCallback(Callback):
     ) -> None:
         del model, optimizer, scheduler, grad_scaler
         if self.synchronize:
-            torch.cuda.synchronize()
+            torch.accelerator.synchronize()
         if self._optimizer_range_ids:
             raise RuntimeError("NVTX optimizer range was not closed before the next optimizer step")
 
@@ -842,7 +843,7 @@ class NVTXCallback(Callback):
     ) -> None:
         del model, optimizer, scheduler, iteration
         if self.synchronize:
-            torch.cuda.synchronize()
+            torch.accelerator.synchronize()
         if not self._optimizer_range_ids:
             raise RuntimeError("NVTX optimizer range ended without a matching start")
         self._close_optimizer_ranges()

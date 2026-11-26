@@ -22,6 +22,7 @@ from torch.nn.attention import SDPBackend, sdpa_kernel
 from cosmos_framework.model.attention.frontend import attention as i4_attention
 from cosmos_framework.model.attention.varlen import generate_varlen_parameters
 from cosmos_framework.model.tokenizer.utils.tensors import cat_with_bounded_inputs
+from cosmos_framework.utils.device import is_accelerator_device
 
 if TYPE_CHECKING:
     from cosmos_framework.model.tokenizer.models.modules.sparse_tensor import SparseTensor
@@ -259,7 +260,7 @@ def _unmasked_group_scaled_dot_product_attention(
     q_heads_first = q.permute(1, 0, 2).unsqueeze(0)  # [1,H,Tq,D]
     k_heads_first = k.permute(1, 0, 2).unsqueeze(0)  # [1,H,Tkv,D]
     v_heads_first = v.permute(1, 0, 2).unsqueeze(0)  # [1,H,Tkv,Dv]
-    if q.is_cuda:
+    if is_accelerator_device(q.device):
         # A math fallback would retain token-square attention state for backward.
         # Require a fused CUDA implementation so this path stays linear-memory.
         with sdpa_kernel([SDPBackend.CUDNN_ATTENTION, SDPBackend.FLASH_ATTENTION, SDPBackend.EFFICIENT_ATTENTION]):

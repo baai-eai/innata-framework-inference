@@ -24,6 +24,7 @@ from cosmos_framework.data.generator.utils import VIDEO_RES_SIZE_INFO
 from cosmos_framework.model.generator.tokenizers.interface import VideoTokenizerInterface
 from cosmos_framework.utils import log
 from cosmos_framework.utils.compile_cache import sha256_file
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.distributed import get_rank, sync_model_states
 from cosmos_framework.utils.easy_io import easy_io
 from cosmos_framework.utils.flags import DEVICE, INTERNAL, TRAINING
@@ -1766,7 +1767,7 @@ class Wan2pt2VAEInterface(VideoTokenizerInterface):
             return [torch.rand_like(c) if c is not None else None for c in cache]
 
         def _rand_input(t: int, h: int, w: int) -> torch.Tensor:
-            return torch.rand((1, 12, t, h, w), dtype=torch.bfloat16, device="cuda")
+            return torch.rand((1, 12, t, h, w), dtype=torch.bfloat16, device=accelerator_device())
 
         def _compile_variant(
             wrapper: _ChunkEncodeForAOT,
@@ -1955,7 +1956,7 @@ class Wan2pt2VAEInterface(VideoTokenizerInterface):
             pkg_paths = artifact_pkg_paths
 
         # -- Load every .pt2 package and bind to the existing encoder weights. --
-        device_index = torch.cuda.current_device()
+        device_index = torch.accelerator.current_device_index()
         state_dict = wrapper.state_dict()
 
         def _variant_matches_eager(fn: Callable, key: _AOTChunkKey) -> bool:

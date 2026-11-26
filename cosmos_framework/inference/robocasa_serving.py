@@ -27,6 +27,7 @@ from cosmos_framework.inference.action_serving import (
 from cosmos_framework.inference.common.args import SampleOutput, SampleOutputs
 from cosmos_framework.inference.robocasa_geometry import STATE_KEY, state128
 from cosmos_framework.utils import misc
+from cosmos_framework.utils.device import accelerator_device
 
 ACTION_DOMAIN = "panda_omron_mobile/native_control12/robocasa365_source_controller_v1"
 STATE_DOMAIN = "panda_omron_mobile/state_eef20_base9/current_canonical_tcp_world_v1"
@@ -194,9 +195,9 @@ class RoboCasaService(DistributedActionService):
         return prepare_request(request, self.spec, self.model.config, output_dir, self.video_key)
 
     def execute(self, request, batch):
-        torch.cuda.set_device(int(os.environ.get("LOCAL_RANK", "0")))
+        torch.accelerator.set_device_index(int(os.environ.get("LOCAL_RANK", "0")))
         started = time.monotonic()
-        batch = misc.to(batch, device="cuda")
+        batch = misc.to(batch, device=accelerator_device())
         sampling = {k: request.sample_args[k] for k in ("guidance_interval", "normalize_cfg", "sigma_max")}
         sampling["has_negative_prompt"] = "neg_ai_caption" in batch
         for key in ("reuse_small_action_und", "reuse_small_action_metadata"):

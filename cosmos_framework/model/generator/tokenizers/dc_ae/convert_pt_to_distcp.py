@@ -18,7 +18,7 @@ class ConvertPTToDistCPConfig:
 
 def main():
     torch.distributed.init_process_group(backend="nccl")
-    torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
+    torch.accelerator.set_device_index(int(os.environ["LOCAL_RANK"]))
     cfg = OmegaConf.to_object(OmegaConf.merge(OmegaConf.structured(ConvertPTToDistCPConfig), OmegaConf.from_cli()))
     checkpoint = torch.load(cfg.input_path, map_location="cpu")
     torch.distributed.checkpoint.save(checkpoint, checkpoint_id=cfg.output_dir)

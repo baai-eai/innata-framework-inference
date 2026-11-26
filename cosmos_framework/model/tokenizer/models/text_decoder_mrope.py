@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import torch
 
+from cosmos_framework.utils.device import is_accelerator_device
+
 MROPE_AXIS_COUNT = 3
 NEMOTRON_2B_MROPE_SECTION = (24, 20, 20)
 
@@ -22,7 +24,7 @@ def _assert_tensor_condition(condition: torch.Tensor, *, message: str) -> None: 
     """Validate one device scalar without synchronizing the CUDA host thread."""
     if condition.numel() != 1:
         raise ValueError(f"Tensor condition must contain one element, got shape {tuple(condition.shape)}.")
-    if condition.is_cuda:
+    if is_accelerator_device(condition.device):
         torch._assert_async(condition, message)
     elif not bool(condition.item()):
         raise ValueError(message)

@@ -92,7 +92,7 @@ class Qwen3OmniThinkingAudioEncoder(nn.Module):
         use_bf16_autocast = (
             self.config._attn_implementation == "flash_attention_2" and packed_features.device.type == "cuda"
         )
-        with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=use_bf16_autocast):
+        with torch.autocast(device_type=packed_features.device.type, dtype=torch.bfloat16, enabled=use_bf16_autocast):
             flat_features = self.encoder(
                 input_features=packed_features,
                 feature_lens=input_lengths,

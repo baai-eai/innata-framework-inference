@@ -44,6 +44,7 @@ from dataclasses import dataclass, field
 from torch.distributed.device_mesh import DeviceMesh, init_device_mesh
 
 from cosmos_framework.utils import log
+from cosmos_framework.utils.device import accelerator_device
 
 _MAX_CP = 32
 
@@ -152,7 +153,7 @@ class ParallelDims:
         log.info(f"Building {len(dims)}-D device mesh with {names}, {dims}")
         return init_device_mesh(device_type, tuple(dims), mesh_dim_names=tuple(names))
 
-    def build_meshes(self, device_type: str = "cuda") -> None:
+    def build_meshes(self, device_type: str | None = None) -> None:
         """Build the dp / cp / cfgp meshes.
 
         cp + cfgp are bundled into a single 3-D overlay mesh
@@ -163,6 +164,7 @@ class ParallelDims:
         ``'dp'``, ``'dp_shard'``, ``'dp_replicate'``, ``'cp'``, ``'cfgp'``
         depending on which axes are enabled.
         """
+        device_type = accelerator_device().type if device_type is None else device_type
         self._meshes = {}
 
         if self.cfgp_enabled or self.cp_enabled:

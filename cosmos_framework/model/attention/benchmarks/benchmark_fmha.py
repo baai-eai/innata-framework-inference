@@ -103,6 +103,7 @@ from cosmos_framework.model.attention import attention
 from cosmos_framework.model.attention.backends import choose_backend
 from cosmos_framework.model.attention.masks import CausalType
 from cosmos_framework.model.attention.utils import get_arch_tag
+from cosmos_framework.utils.device import accelerator_device
 
 DTYPE_MAP: dict[str, torch.dtype] = {
     "bf16": torch.bfloat16,
@@ -344,18 +345,18 @@ def benchmark_backend(
         with ctx:
             for _ in range(warmup):
                 sink = call()
-            torch.cuda.synchronize()
+            torch.accelerator.synchronize()
 
-            torch.cuda.reset_peak_memory_stats(q.device)
-            start = torch.cuda.Event(enable_timing=True)
-            end = torch.cuda.Event(enable_timing=True)
+            torch.accelerator.reset_peak_memory_stats(q.device)
+            start = torch.Event(enable_timing=True)
+            end = torch.Event(enable_timing=True)
             latencies_ms: list[float] = []
             torch.cuda.nvtx.range_push(f"fmha.{shard_mode}.cp{cp_size}.{backend or 'auto'}")
             for _ in range(iters):
                 start.record()
                 sink = call()
                 end.record()
-                torch.cuda.synchronize()
+                torch.accelerator.synchronize()
                 latencies_ms.append(start.elapsed_time(end))  # ms
             torch.cuda.nvtx.range_pop()
             # Force a host-side read of the result so the compiled output is genuinely
@@ -365,7 +366,7 @@ def benchmark_backend(
     except Exception as e:  # noqa: BLE001 - report and skip incompatible backends
         return [], 0, f"{type(e).__name__}: {e}"
 
-    peak_bytes = torch.cuda.max_memory_allocated(q.device)
+    peak_bytes = torch.accelerator.max_memory_allocated(q.device)
     return latencies_ms, peak_bytes, None
 
 
@@ -378,8 +379,8 @@ def init_distributed() -> tuple[int, int, int]:
     local_rank = int(os.environ.get("LOCAL_RANK", "0"))
     rank = int(os.environ.get("RANK", "0"))
     world_size = int(os.environ.get("WORLD_SIZE", "1"))
-    if torch.cuda.is_available():
-        torch.cuda.set_device(local_rank)
+    if torch.accelerator.is_available():
+        torch.accelerator.set_device_index(local_rank)
     if world_size > 1 and not dist.is_initialized():
         dist.init_process_group("nccl")
     return rank, local_rank, world_size
@@ -466,7 +467,7 @@ def main() -> None:
         log.LEVEL = "DEBUG"
         log.init_loguru_stdout()
 
-    if not torch.cuda.is_available():
+    if not torch.accelerator.is_available():
         raise SystemExit("CUDA is not available; this benchmark requires a GPU.")
 
     if args.cp_size < 1:
@@ -479,7 +480,7 @@ def main() -> None:
 
     rank, local_rank, world_size = init_distributed()
     is_main = rank == 0
-    device = torch.device("cuda", local_rank) if args.device == "cuda" else torch.device(args.device)
+    device = accelerator_device(local_rank) if args.device == "cuda" else torch.device(args.device)
     dtype = DTYPE_MAP[args.dtype]
     head_dim_v = args.head_dim_v if args.head_dim_v is not None else args.head_dim
     backends: list[str | None] = [None if b == "auto" else b for b in args.backends]
@@ -501,7 +502,7 @@ def main() -> None:
 
     if is_main and not args.json:
         arch_tag = get_arch_tag(device)
-        print(f"Device: {torch.cuda.get_device_name(device)} (arch_tag={arch_tag}, sm_{arch_tag})")
+        print(f"Device: {torch.get_device_module().get_device_properties(device).name} (arch_tag={arch_tag}, sm_{arch_tag})")
         print(
             f"Config: batch={args.batch} Hq={args.num_q_heads} Hkv={args.num_kv_heads} "
             f"D={args.head_dim} Dv={head_dim_v} dtype={args.dtype} causal={args.causal} "

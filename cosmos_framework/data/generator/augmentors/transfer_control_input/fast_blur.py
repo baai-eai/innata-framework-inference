@@ -7,6 +7,8 @@ from ctypes import POINTER, c_float, c_int, c_ubyte, sizeof
 
 import torch
 
+from cosmos_framework.utils.device import accelerator_device, is_accelerator_device
+
 
 class BilateralGaussian:
     class NppiSize(ctypes.Structure):
@@ -47,8 +49,8 @@ class BilateralGaussian:
         ]
 
     def _prepare_input(self, image_tensor):
-        if not image_tensor.is_cuda:
-            image_tensor = image_tensor.cuda()
+        if not is_accelerator_device(image_tensor.device):
+            image_tensor = image_tensor.to(accelerator_device())
         if image_tensor.dtype != torch.uint8:
             image_tensor = (image_tensor * 255).byte()
         return image_tensor

@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Final
 
+import torch
+
 
 class StrEnum(str, Enum):
     """Backport of StrEnum from Python 3.11."""
@@ -50,13 +52,9 @@ Sets parameters to minimum values (e.g. num_steps=1, num_layers=2).
 """
 
 
-class Device(StrEnum):
-    CUDA = "cuda"
-    CPU = "cpu"
-    META = "meta"
-
-
-DEVICE: Final[Device] = Device(os.environ.get("COSMOS_DEVICE", "cuda").lower())
+DEVICE: Final[str] = os.environ.get(
+    "COSMOS_DEVICE", str(torch.accelerator.current_accelerator() or "cpu")
+).lower()
 """Torch device to use.
 
 Used for checkpoint conversion and smoke tests.
@@ -78,7 +76,7 @@ class Flags:
     internal: bool = INTERNAL
     training: bool = TRAINING
     smoke: bool = SMOKE
-    device: Device = DEVICE
+    device: str = DEVICE
     verbose: bool = VERBOSE
     experimental_checkpoints: bool = EXPERIMENTAL_CHECKPOINTS
 

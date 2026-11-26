@@ -21,6 +21,7 @@ from cosmos_framework.data.generator.sequence_packing.spatial import (
     validate_spatial_position_mode,
 )
 from cosmos_framework.data.generator.sequence_packing.temporal_causal import pack_supertokens_temporal_causal
+from cosmos_framework.utils.device import is_accelerator_device
 
 if TYPE_CHECKING:
     from cosmos_framework.model.generator.utils.data_and_condition import GenerationDataClean
@@ -177,7 +178,7 @@ def pack_input_sequence(
 
     assert special_tokens is not None, "Special tokens must be provided"
     assert isinstance(input_timesteps, torch.Tensor), "input_timesteps must be a tensor"
-    if input_timesteps.is_cuda:
+    if is_accelerator_device(input_timesteps.device):
         raise ValueError("input_timesteps must be on CPU, not CUDA")
     if isinstance(input_text_indexes, torch.Tensor):
         raise ValueError("input_text_tokens must be a list, not a tensor")

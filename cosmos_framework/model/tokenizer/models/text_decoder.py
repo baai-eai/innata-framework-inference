@@ -1024,7 +1024,7 @@ class TextDecoderWrapper(nn.Module):
             raise ValueError("MLP-only text checkpointing requires gradient_checkpointing=True.")
         if (
             packed_attention_backend == PACKED_ATTENTION_BACKEND_NATTEN
-            and torch.cuda.is_available()
+            and torch.accelerator.is_available()
             and not NATTEN_SUPPORTED
         ):
             raise RuntimeError("NATTEN packed attention was requested but NATTEN is unavailable or unsupported.")

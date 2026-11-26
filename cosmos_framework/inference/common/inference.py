@@ -18,6 +18,7 @@ import torch.profiler
 from cosmos_framework.inference.common.args import GuardrailArgs, SampleArgs, SampleOutputs, SetupArgs
 from cosmos_framework.inference.common.init import is_rank0
 from cosmos_framework.utils import log
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.misc import TrainingTimer
 
 if TYPE_CHECKING:
@@ -55,7 +56,7 @@ def sync_distributed_errors():
 
     Raises a DistributedError on all ranks if ANY rank encountered an exception.
     """
-    error_flag = torch.zeros(1, dtype=torch.int32, device="cuda")  # [1]
+    error_flag = torch.zeros(1, dtype=torch.int32, device=accelerator_device())  # [1]
     local_error: Exception | None = None
 
     try:

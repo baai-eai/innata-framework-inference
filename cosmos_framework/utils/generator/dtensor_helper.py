@@ -8,6 +8,7 @@ from typing import Any
 
 import torch
 
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.misc import get_local_tensor_if_DTensor as dt2lt
 
 
@@ -41,7 +42,7 @@ class DTensorFastEmaModelUpdater:
     @torch.no_grad()
     def cache(self, parameters: Any, is_cpu: bool = False) -> None:
         assert self.is_cached is False, "EMA cache is already taken. Did you forget to restore it?"
-        device = "cpu" if is_cpu else "cuda"
+        device = "cpu" if is_cpu else str(accelerator_device())
         self.collected_params = [dt2lt(param).clone().to(device) for param in parameters]
         self.is_cached = True
 

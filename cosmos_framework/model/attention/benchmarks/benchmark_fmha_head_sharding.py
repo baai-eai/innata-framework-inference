@@ -98,6 +98,7 @@ import torch
 import torch.distributed as dist
 
 from cosmos_framework.model.attention import attention
+from cosmos_framework.utils.device import accelerator_device
 
 
 @dataclass(frozen=True)
@@ -190,8 +191,8 @@ def _init_rank() -> tuple[int, int, int]:
     local_rank = int(os.environ.get("LOCAL_RANK", "0"))
     rank = int(os.environ.get("RANK", "0"))
     world_size = int(os.environ.get("WORLD_SIZE", "1"))
-    if torch.cuda.is_available():
-        torch.cuda.set_device(local_rank)
+    if torch.accelerator.is_available():
+        torch.accelerator.set_device_index(local_rank)
     if world_size > 1 and not dist.is_initialized():
         dist.init_process_group("nccl")
     return rank, local_rank, world_size
@@ -328,18 +329,18 @@ def _benchmark(
     with torch.inference_mode():
         for _ in range(config.warmup_iters):
             _warmup_out = run_once(query, key, value)  # [B,S_q,H_local,D]
-        torch.cuda.synchronize()
+        torch.accelerator.synchronize()
 
-        torch.cuda.reset_peak_memory_stats(query.device)
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
+        torch.accelerator.reset_peak_memory_stats(query.device)
+        start = torch.Event(enable_timing=True)
+        end = torch.Event(enable_timing=True)
         torch.cuda.nvtx.range_push(f"fmha_{config.shard_mode}_sharding.cp{config.cp_size}")
         start.record()
         for _ in range(config.iters):
             out = run_once(query, key, value)  # [B,S_q,H_local,D]
         end.record()
         torch.cuda.nvtx.range_pop()
-        torch.cuda.synchronize()
+        torch.accelerator.synchronize()
 
     elapsed_ms = start.elapsed_time(end)
     tokens = config.batch_size * config.q_len
@@ -348,7 +349,7 @@ def _benchmark(
         "elapsed_ms": elapsed_ms,
         "iters": config.iters,
         "avg_ms": elapsed_ms / config.iters,
-        "max_memory_allocated_bytes": torch.cuda.max_memory_allocated(query.device),
+        "max_memory_allocated_bytes": torch.accelerator.max_memory_allocated(query.device),
         "tokens_per_second": (tokens * config.iters) / (elapsed_ms / 1000.0),
         "checksum": checksum,
     }
@@ -356,12 +357,12 @@ def _benchmark(
 
 def main() -> None:
     config = _parse_args()
-    if not torch.cuda.is_available():
+    if not torch.accelerator.is_available():
         raise RuntimeError("CUDA is required for this FMHA benchmark")
     rank, local_rank, world_size = _init_rank()
     try:
         local_shape = _validate_config(config, rank)
-        device = torch.device("cuda", local_rank)
+        device = accelerator_device(local_rank)
         dtype = _dtype_from_name(config.dtype)
         query, key, value = _make_inputs(config, local_shape, device, dtype)
         # query: [B,S_q,H_local,D], key/value: [B,S_kv,H_kv_local,D]
@@ -376,7 +377,7 @@ def main() -> None:
             "rank": rank,
             "local_rank": local_rank,
             "world_size": world_size,
-            "device": torch.cuda.get_device_name(device),
+            "device": torch.get_device_module().get_device_properties(device).name,
             "config": asdict(config),
             "local_shape": asdict(local_shape),
             "local_q_heads": local_shape.num_q_heads,

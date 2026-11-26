@@ -19,6 +19,8 @@ from typing import Any
 import torch
 from loguru import logger as logging
 
+from cosmos_framework.utils.device import accelerator_device, is_accelerator_device
+
 
 def compute_psnr(
     original: torch.Tensor,
@@ -188,7 +190,7 @@ class FIDComputer:
 
     def __init__(
         self,
-        device: str = "cuda",
+        device: str | torch.device | None = None,
         feature: int | torch.nn.Module = 2048,
         normalize: bool = True,
         sync_on_compute: bool = True,
@@ -207,7 +209,7 @@ class FIDComputer:
             feature_extractor_weights_path: Optional local path to torch-fidelity
                 Inception weights. Falls back to TOKENIZER_FID_WEIGHTS_PATH env var.
         """
-        self.device = device
+        self.device = accelerator_device() if device is None else device
         self._metric = None
         self._normalize = normalize
         self._feature = feature
@@ -224,15 +226,15 @@ class FIDComputer:
         local_rank = os.environ.get("LOCAL_RANK")
         if local_rank is not None:
             return int(local_rank) == 0
-        if torch.cuda.is_available():
-            return torch.cuda.current_device() == 0
+        if torch.accelerator.is_available():
+            return torch.accelerator.current_device_index() == 0
         return True
 
     def _autocast_context(self) -> Any:
         """Return an autocast context appropriate for the current device."""
         device_type = torch.device(self.device).type
-        if device_type == "cuda":
-            return torch.autocast(device_type="cuda", enabled=False, dtype=torch.float32)
+        if is_accelerator_device(torch.device(self.device)):
+            return torch.autocast(device_type=device_type, enabled=False, dtype=torch.float32)
         return nullcontext()
 
     def _ensure_initialized(self) -> bool:

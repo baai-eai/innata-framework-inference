@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 
 from cosmos_framework.utils.config import make_freezable
+from cosmos_framework.utils.device import accelerator_device
 
 
 @make_freezable
@@ -45,5 +46,5 @@ class VideoSafetyModel(nn.Module):
 
     @torch.inference_mode()
     def forward(self, data_batch: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
-        logits = self.network(data_batch["data"].cuda())
+        logits = self.network(data_batch["data"].to(accelerator_device()))
         return {"logits": logits}

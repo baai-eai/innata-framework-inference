@@ -28,9 +28,11 @@ def get_arch_tag(device: torch.device | None = None) -> int:
     Returns:
         device_cc (int): compute capability in the SmXXX format (i.e. 90 for Hopper).
     """
-    if torch.cuda.is_available() and torch.version.cuda and (device is None or device.type == "cuda"):
-        major, minor = torch.cuda.get_device_capability(device)
-        return major * 10 + minor
+    if torch.version.cuda and (device is None or device.type in ("cuda", "flagos")):
+        backend = torch.get_device_module(device)
+        if backend.is_available():
+            properties = backend.get_device_properties(device)
+            return properties.major * 10 + properties.minor
     return 0
 
 

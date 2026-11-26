@@ -5,8 +5,8 @@
 # Standard library imports
 import array
 import fcntl
-import math
 import ipaddress
+import math
 import os
 import re
 import socket
@@ -211,7 +211,7 @@ def gradient_norm_clipping(
     total_norm = (
         torch.nn.utils.get_total_norm(grads, norm_type, error_if_nonfinite, foreach)
         if len(grads) > 0
-        else torch.tensor(0.0).to(torch.cuda.current_device()).float()  # []
+        else torch.tensor(0.0).to(torch.accelerator.current_device_index()).float()  # []
     )
 
     # If total_norm is a DTensor, the placements must be `torch.distributed._tensor.ops.math_ops._NormPartial`.

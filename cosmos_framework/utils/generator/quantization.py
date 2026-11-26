@@ -30,8 +30,9 @@ from torch import nn
 from torch.distributed.tensor import DTensor, distribute_tensor
 from torch.nn import functional as F
 
-from cosmos_framework.utils import log
 from cosmos_framework.configs.base.defaults.quantization import QuantizationConfig
+from cosmos_framework.utils import log
+from cosmos_framework.utils.device import accelerator_device
 
 # NOTE: ``torchao`` is imported lazily inside the functions below rather than at
 # module top level. These two helpers are the only torchao consumers, but this
@@ -763,10 +764,10 @@ def apply_quantization_inplace(model: nn.Module, quantization_config: Quantizati
         # baseline could over-report free memory. PyTorch's caching allocator then holds
         # freed blocks in its own pool without returning them to the driver, so empty_cache()
         # flushes that pool back to the driver.
-        torch.cuda.synchronize()
+        torch.accelerator.synchronize()
         gc.collect()
-        torch.cuda.empty_cache()
-        free, total = torch.cuda.mem_get_info(torch.device("cuda", torch.cuda.current_device()))
+        torch.accelerator.empty_cache()
+        free, total = torch.accelerator.get_memory_info(accelerator_device(torch.accelerator.current_device_index()))
         log.info(f"GPU memory ({tag}): {free / 2**30:.2f} GiB free / {total / 2**30:.2f} GiB total")
 
     _reclaim_and_log_gpu_memory("before quantization")

@@ -7,6 +7,7 @@ import torch
 from retinaface.utils.nms.py_cpu_nms import py_cpu_nms
 
 from cosmos_framework.utils import log
+from cosmos_framework.utils.device import accelerator_device
 
 
 # Adapted from https://github.com/biubug6/Pytorch_Retinaface/blob/master/detect.py
@@ -93,10 +94,7 @@ def load_model(model, pretrained_path, load_to_cpu):
     if load_to_cpu:
         pretrained_dict = torch.load(pretrained_path, map_location=lambda storage, loc: storage, weights_only=True)
     else:
-        device = torch.cuda.current_device()
-        pretrained_dict = torch.load(
-            pretrained_path, map_location=lambda storage, loc: storage.cuda(device), weights_only=True
-        )
+        pretrained_dict = torch.load(pretrained_path, map_location=accelerator_device(), weights_only=True)
     if "state_dict" in pretrained_dict.keys():
         pretrained_dict = _remove_prefix(pretrained_dict["state_dict"], "module.")
     else:

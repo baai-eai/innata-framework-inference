@@ -16,6 +16,8 @@ import torch
 import torch.nn.functional as F
 from torch.nn.attention.flex_attention import create_block_mask, flex_attention
 
+from cosmos_framework.utils.device import is_accelerator_device
+
 _compiled_attention = torch.compile(flex_attention, dynamic=False)
 
 
@@ -92,7 +94,9 @@ def sample_block_mask(query_ids, key_ids, *, causal=False):
         # cannot see padding keys. Padding outputs never enter the loss.
         return real | ((qids[q] < 0) & (k == 0))
 
-    return create_block_mask(allowed, None, None, nq, nk, device=str(query_ids.device), _compile=query_ids.is_cuda)
+    return create_block_mask(
+        allowed, None, None, nq, nk, device=str(query_ids.device), _compile=is_accelerator_device(query_ids.device)
+    )
 
 
 def sparse_attend(q, k, v, mask):
@@ -101,6 +105,6 @@ def sparse_attend(q, k, v, mask):
     # when padding the width_head_dim_1b preset's Dh=48 to Dh=64.
     padded = 1 << (dim - 1).bit_length()
     q, k, v = [F.pad(x, (0, padded - dim)).transpose(0, 1)[None] for x in (q, k, v)]
-    fn = _compiled_attention if q.is_cuda else flex_attention
+    fn = _compiled_attention if is_accelerator_device(q.device) else flex_attention
     out = fn(q, k, v, block_mask=mask, enable_gqa=True, scale=dim**-0.5)
     return out[0, :, :, :dim].transpose(0, 1).flatten(1)

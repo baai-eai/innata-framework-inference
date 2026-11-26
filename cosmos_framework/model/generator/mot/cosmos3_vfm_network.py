@@ -45,6 +45,7 @@ from cosmos_framework.model.generator.reasoner.qwen3_vl.utils import (
 )
 from cosmos_framework.model.generator.utils.memory import MemoryState
 from cosmos_framework.utils import log
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.nvtx import nvtx_range
 
 
@@ -262,7 +263,7 @@ class Cosmos3VFMNetwork(PreTrainedModel):
             # follows from, which is the same for every device in this process, so the local one
             # stands in for the one the batch will arrive on.
             device = (
-                torch.device("cuda", torch.cuda.current_device()) if torch.cuda.is_available() else torch.device("cpu")
+                accelerator_device(torch.accelerator.current_device_index()) if torch.accelerator.is_available() else torch.device("cpu")
             )
             self.flex_backend = resolve_flex_backend(device, config.flex_attention_backend)
             log.info(
@@ -851,13 +852,13 @@ class Cosmos3VFMNetwork(PreTrainedModel):
         )
         if packed_seq.uses_single_timestep and timesteps.numel() > 1:
             timestep = timesteps[:1]  # [1]
-            with torch.autocast("cuda", enabled=True, dtype=torch.float32):
+            with torch.autocast(timestep.device.type, enabled=True, dtype=torch.float32):
                 timestep_embed = embedder(timestep)  # [1,hidden_size]
             # Materialize: expand() aliases storage; in-place ops on a float32 no-op .to() would corrupt all rows.
             return timestep_embed.expand(timesteps.shape[0], -1).contiguous()  # [N_noisy_frames,hidden_size]
 
         # Timesteps are computed in FP32 for numerical stability.
-        with torch.autocast("cuda", enabled=True, dtype=torch.float32):
+        with torch.autocast(timesteps.device.type, enabled=True, dtype=torch.float32):
             return embedder(timesteps)  # [N_noisy_frames,hidden_size]
 
     def _encode_vision(

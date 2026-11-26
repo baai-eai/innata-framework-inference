@@ -31,6 +31,7 @@ from cosmos_framework.model.generator.omni_mot_model import OmniMoTModel
 from cosmos_framework.model.generator.reasoner.qwen3_vl.utils import _SYSTEM_PROMPT_TRANSFER
 from cosmos_framework.model.generator.utils.data_and_condition import GenerationDataClean
 from cosmos_framework.utils import log
+from cosmos_framework.utils.device import accelerator_device
 
 
 @dataclass
@@ -171,8 +172,8 @@ def build_transfer_batch(
     When ``N=1`` the single weight normalises to 1.0, reproducing the original
     ``two_way_attention`` behaviour exactly.
     """
-    control_5ds = [cv.unsqueeze(0).cuda().to(dtype=torch.bfloat16) for cv in control_videos]
-    target_5d = target_video.unsqueeze(0).cuda().to(dtype=torch.bfloat16)
+    control_5ds = [cv.unsqueeze(0).to(accelerator_device()).to(dtype=torch.bfloat16) for cv in control_videos]
+    target_5d = target_video.unsqueeze(0).to(accelerator_device()).to(dtype=torch.bfloat16)
     num_vision_items = len(control_5ds) + 1
     if num_conditional_frames > 0:
         condition_frame_indexes = list(range((num_conditional_frames - 1) // temporal_compression_factor + 1))
@@ -189,14 +190,14 @@ def build_transfer_batch(
     assert total > 0, f"control_weights must have a positive sum, got {control_weights}"
     control_weights = [w / total for w in control_weights]
 
-    size = torch.tensor([[height, width, height, width]], dtype=torch.float32).cuda()
+    size = torch.tensor([[height, width, height, width]], dtype=torch.float32).to(accelerator_device())
     batch: dict[str, object] = {
         "dataset_name": "video_transfer",
         "system_prompt": _SYSTEM_PROMPT_TRANSFER,
         "video": [*control_5ds, target_5d],
         "image_size": [size] * num_vision_items,
-        "padding_mask": torch.zeros(1, 1, height, width).cuda(),
-        "num_frames": torch.tensor([num_frames]).cuda(),
+        "padding_mask": torch.zeros(1, 1, height, width).to(accelerator_device()),
+        "num_frames": torch.tensor([num_frames]).to(accelerator_device()),
         "num_vision_items_per_sample": [num_vision_items],
         # Per-control weights for multi-control weighted attention aggregation.
         # Shape: [num_samples], each element is a list of floats (one per control).
@@ -213,8 +214,8 @@ def build_transfer_batch(
                 share_vision_temporal_positions=share_vision_temporal_positions,
             )
         ],
-        "fps": torch.tensor([fps]).cuda(),
-        "conditioning_fps": torch.tensor([fps]).cuda(),
+        "fps": torch.tensor([fps]).to(accelerator_device()),
+        "conditioning_fps": torch.tensor([fps]).to(accelerator_device()),
         prompt_key: [prompt],
     }
     if negative_prompt:
@@ -459,7 +460,7 @@ def generate_transfer_sample(
         guidance = sample_args.guidance
 
     prompt_sample_args = sample_args.model_copy(update={"num_frames": chunk_frames, "fps": int(round(output_fps))})
-    chunk_prompt_data = _get_prompt_sample_data(prompt_sample_args, model, h=height, w=width, device="cuda")
+    chunk_prompt_data = _get_prompt_sample_data(prompt_sample_args, model, h=height, w=width, device=accelerator_device())
     prompt = chunk_prompt_data[model.input_caption_key][0]
     negative_prompt = chunk_prompt_data.get("neg_" + model.input_caption_key, [None])[0]
 

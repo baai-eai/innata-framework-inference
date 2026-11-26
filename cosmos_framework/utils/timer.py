@@ -236,7 +236,7 @@ class Timer(ContextDecorator):
         self.cpu_time_us = 0
         self.cuda_time_us = 0
 
-    def start(self, cuda_device: torch.device | None = None, cuda_stream: torch.cuda.Stream | None = None):
+    def start(self, cuda_device: torch.device | None = None, cuda_stream: torch.Stream | None = None):
         """
         Start time measurements.
 
@@ -252,15 +252,15 @@ class Timer(ContextDecorator):
         self.busy = True
 
         if self.measure_cuda:
-            self.cuda_stream = cuda_stream if cuda_stream is not None else torch.cuda.current_stream(cuda_device)
+            self.cuda_stream = cuda_stream if cuda_stream is not None else torch.accelerator.current_stream(cuda_device)
             self.cuda_stream.synchronize()
 
         if self.measure_cpu:
             self.cpu_time_start = time.time()
 
         if self.measure_cuda:
-            self.cuda_start_event = torch.cuda.Event(enable_timing=True)
-            self.cuda_end_event = torch.cuda.Event(enable_timing=True)
+            self.cuda_start_event = torch.Event(enable_timing=True)
+            self.cuda_end_event = torch.Event(enable_timing=True)
             self.cuda_stream.record_event(self.cuda_start_event)
 
     def end(self):

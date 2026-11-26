@@ -7,6 +7,7 @@ import transformer_engine as te
 import transformer_engine_torch as tex
 
 from cosmos_framework.utils import distributed, log
+from cosmos_framework.utils.device import accelerator_device
 
 
 class FusedAdam(torch.optim.Optimizer):
@@ -102,7 +103,7 @@ class FusedAdam(torch.optim.Optimizer):
             self._step_supports_amp_scaling = True
 
         # Skip buffer
-        self._dummy_overflow_buf = torch.tensor([0], dtype=torch.int, device="cuda")
+        self._dummy_overflow_buf = torch.tensor([0], dtype=torch.int, device=accelerator_device())
         self.multi_tensor_adam = tex.multi_tensor_adam
         self.multi_tensor_adam_capturable = tex.multi_tensor_adam_capturable
         self.multi_tensor_adam_capturable_master = tex.multi_tensor_adam_capturable_master
@@ -345,21 +346,21 @@ class FusedAdam(torch.optim.Optimizer):
         for group in self.param_groups:
             if self.capturable:
                 group["lr"] = (
-                    group["lr"].cuda()
+                    group["lr"].to(accelerator_device())
                     if isinstance(group["lr"], torch.Tensor)
-                    else torch.tensor(group["lr"], dtype=torch.float32).cuda()
+                    else torch.tensor(group["lr"], dtype=torch.float32).to(accelerator_device())
                 )
 
             if "step" in group:
                 if self.capturable:
                     if distributed.get_rank() == 0:
                         step = (
-                            group["step"].cuda()
+                            group["step"].to(accelerator_device())
                             if isinstance(group["step"], torch.Tensor)
-                            else torch.tensor([group["step"]], dtype=torch.int32).cuda()
+                            else torch.tensor([group["step"]], dtype=torch.int32).to(accelerator_device())
                         )
                     else:
-                        step = torch.zeros(1, dtype=torch.int32).cuda()
+                        step = torch.zeros(1, dtype=torch.int32).to(accelerator_device())
                     # make it compatible with FSDP optimizer
                     distributed.broadcast(step, 0)
                     group["step"] = step

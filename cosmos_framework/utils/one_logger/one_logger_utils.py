@@ -1378,8 +1378,8 @@ def initialize_one_logger_from_imaginaire_config(config: Any) -> None:
         job_environment = os.uname().nodename
 
     # Check GPU information.
-    if torch.cuda.is_available():
-        gpu_name = torch.cuda.get_device_name().replace(" ", "-")  # ex) NVIDIA-A100-SXM4-80GB
+    if torch.accelerator.is_available():
+        gpu_name = torch.get_device_module().get_device_properties().name.replace(" ", "-")  # ex) NVIDIA-A100-SXM4-80GB
     else:
         gpu_name = "none"
 

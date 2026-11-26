@@ -11,6 +11,7 @@ import numpy as np
 import torch
 
 from cosmos_framework.data.generator.augmentors.transfer_control_input.fast_blur import BilateralGaussian
+from cosmos_framework.utils.device import accelerator_device
 
 
 @attrs.define
@@ -81,7 +82,7 @@ def apply_bilateral_filter(
 ) -> np.ndarray:
     if bilateral_cuda_module is not None:
         blurred_image = []
-        frames_tensor = torch.from_numpy(frames).cuda()
+        frames_tensor = torch.from_numpy(frames).to(accelerator_device())
         for _image in frames_tensor.permute(1, 2, 3, 0):
             blurred_image.append(bilateral_cuda_module(_image, d // 3, (sigma_color // 2) ** 2, sigma_space**2))
         blurred_image = torch.stack(blurred_image).permute(3, 0, 1, 2)

@@ -209,8 +209,8 @@ import tyro
 from torch import Tensor
 from torch.nn.attention.flex_attention import BlockMask
 
-from cosmos_framework.model.attention import attention
 from cosmos_framework.configs.base.defaults.flex_attention import NoisyAttentionScope
+from cosmos_framework.model.attention import attention
 from cosmos_framework.model.generator.mot.flex_attention import (
     FlexBackend,
     _get_flash_flex_backend,
@@ -667,7 +667,7 @@ def resolve_peak_tflops(device: torch.device, override: float | None) -> float |
         return override
     if device.type != "cuda":
         return None
-    device_name = torch.cuda.get_device_name(device).lower()
+    device_name = torch.get_device_module().get_device_properties(device).name.lower()
     for name, peak in DENSE_BF16_PEAK_TFLOPS.items():
         if name in device_name:
             return peak
@@ -739,18 +739,18 @@ def time_call(
     try:
         for _ in range(warmup):
             sink = call()
-        torch.cuda.synchronize(device)
+        torch.accelerator.synchronize(device)
 
-        torch.cuda.reset_peak_memory_stats(device)
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
+        torch.accelerator.reset_peak_memory_stats(device)
+        start = torch.Event(enable_timing=True)
+        end = torch.Event(enable_timing=True)
         latencies_ms: list[float] = []
         torch.cuda.nvtx.range_push(f"flex_bench.{label}")
         for _ in range(iters):
             start.record()
             sink = call()
             end.record()
-            torch.cuda.synchronize(device)
+            torch.accelerator.synchronize(device)
             latencies_ms.append(start.elapsed_time(end))  # ms
         torch.cuda.nvtx.range_pop()
         if isinstance(sink, Tensor):
@@ -760,7 +760,7 @@ def time_call(
             raise
         return [], 0, f"{type(e).__name__}: {e}"
 
-    return latencies_ms, torch.cuda.max_memory_allocated(device), None
+    return latencies_ms, torch.accelerator.max_memory_allocated(device), None
 
 
 def _clear_grads(*tensors: Tensor) -> None:
@@ -1371,7 +1371,7 @@ def emit_json_rows(
 
 
 def main(config: BenchConfig) -> None:
-    if config.device.startswith("cuda") and not torch.cuda.is_available():
+    if config.device.startswith("cuda") and not torch.accelerator.is_available():
         raise SystemExit("CUDA is not available; this benchmark requires a GPU.")
     device = torch.device(config.device)
     peak_tflops = resolve_peak_tflops(device, config.peak_tflops)
@@ -1395,7 +1395,7 @@ def main(config: BenchConfig) -> None:
             if peak_tflops is None
             else f"{peak_tflops:g} TFLOP/s dense {config.dtype}"
         )
-        print(f"Device: {torch.cuda.get_device_name(device)} (peak: {peak_label})")
+        print(f"Device: {torch.get_device_module().get_device_properties(device).name} (peak: {peak_label})")
         print(
             f"Model: Hq={config.num_q_heads} Hkv={config.num_kv_heads} D={config.head_dim} dtype={config.dtype} "
             f"layers={config.num_layers} | Timing: warmup={config.warmup} iters={config.iters}"

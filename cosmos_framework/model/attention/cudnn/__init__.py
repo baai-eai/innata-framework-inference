@@ -31,7 +31,7 @@ def cudnn_supported() -> bool:
     longer depends on the standalone cuDNN Python frontend package -- only on the cuDNN that PyTorch
     itself uses.
     """
-    if not torch.cuda.is_available():
+    if not torch.accelerator.is_available():
         log.debug("cuDNN Attention is not supported because PyTorch did not detect CUDA runtime.")
         return False
 

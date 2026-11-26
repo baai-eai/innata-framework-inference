@@ -20,8 +20,8 @@ import torch
 import torch.distributed as dist
 from torch.distributed import get_process_group_ranks
 
-from cosmos_framework.utils.flags import INTERNAL
-from cosmos_framework.utils.device import Device
+from cosmos_framework.utils.device import Device, accelerator_device, is_accelerator_device
+from cosmos_framework.utils.flags import DEVICE, INTERNAL
 
 if dist.is_available():
     from torch.distributed.distributed_c10d import _get_default_group
@@ -36,12 +36,12 @@ if TYPE_CHECKING:
 def init() -> int | None:
     """Initialize distributed training."""
     if dist.is_initialized():
-        return torch.cuda.current_device()
+        return torch.accelerator.current_device_index()
 
     # Set GPU affinity.
-    pynvml.nvmlInit()
     local_rank = int(os.getenv("LOCAL_RANK", 0))
     try:
+        pynvml.nvmlInit()
         device = Device(local_rank)
         os.sched_setaffinity(0, device.get_cpu_affinity())
     except pynvml.NVMLError as e:
@@ -51,7 +51,9 @@ def init() -> int | None:
     os.environ["TORCH_NCCL_BLOCKING_WAIT"] = "0"
     os.environ["TORCH_NCCL_ASYNC_ERROR_HANDLING"] = "1"
     if dist.is_available():
-        torch.cuda.set_device(local_rank)
+        target_device = torch.device(DEVICE)
+        if is_accelerator_device(target_device):
+            torch.accelerator.set_device_index(local_rank)
         # Get the timeout value from environment variable
         timeout_seconds = os.getenv("TORCH_NCCL_HEARTBEAT_TIMEOUT_SEC", 1800)
         # Convert the timeout to an integer (if it isn't already) and then to a timedelta
@@ -65,7 +67,7 @@ def init() -> int | None:
                 f"Set default NCCL subgroup timeout to {subgroup_timeout_seconds} seconds",
                 rank0_only=False,
             )
-        backend = "nccl" if os.environ.get("COSMOS_DEVICE", "cuda").lower() == "cuda" else "gloo"
+        backend = dist.get_default_backend_for_device(target_device) if is_accelerator_device(target_device) else "gloo"
         dist.init_process_group(backend=backend, init_method="env://", timeout=timeout_timedelta)
         log.critical(
             f"Initialized distributed training with local rank {local_rank} using {backend} with timeout {timeout_seconds}",
@@ -121,7 +123,7 @@ def is_local_rank0() -> bool:
     Returns:
         (bool): True if this function is called from the local master GPU, else False.
     """
-    return torch.cuda.current_device() == 0
+    return torch.accelerator.current_device_index() == 0
 
 
 def rank0_only(func: Callable) -> Callable:
@@ -323,15 +325,15 @@ def collate_batches(data_batches: list[dict[str, torch.Tensor]]) -> torch.Tensor
         # Concatenate the local data batches.
         data_concat = torch.cat(data_batches, dim=0)  # type: ignore
         # Get the largest number of local samples from all ranks to determine whether to dummy-pad on this rank.
-        max_num_local_samples = torch.tensor(len(data_concat), device="cuda")
+        max_num_local_samples = torch.tensor(len(data_concat), device=accelerator_device())
         dist.all_reduce(max_num_local_samples, op=dist.ReduceOp.MAX)
         if len(data_concat) < max_num_local_samples:
             assert len(data_concat) + 1 == max_num_local_samples
             dummy = torch.empty_like(data_concat[:1])
             data_concat = torch.cat([data_concat, dummy], dim=0)
-            dummy_count = torch.tensor(1, device="cuda")
+            dummy_count = torch.tensor(1, device=accelerator_device())
         else:
-            dummy_count = torch.tensor(0, device="cuda")
+            dummy_count = torch.tensor(0, device=accelerator_device())
         # Get all concatenated batches from all ranks and concatenate again.
         dist.all_reduce(dummy_count, op=dist.ReduceOp.SUM)
         data_concat = all_gather_tensor(data_concat.contiguous())
@@ -420,7 +422,7 @@ def _verify_param_dtype_across_processes(
     local_dtypes = torch.tensor(
         [_dtype_to_int(p.dtype) for p in parameters],
         dtype=torch.int64,
-        device="cuda",
+        device=accelerator_device(),
     )
 
     # Gather dtype vectors from every rank.
@@ -622,7 +624,7 @@ def _extract_tensor_leaves(value: Any, min_tensor_bytes: int) -> tuple[Any, list
             # Pickling a CUDA tensor preserves the source device index, so a tensor
             # broadcast from cuda:0 would remain on cuda:0 in a cuda:1 process.
             # Always use the direct path so receivers rebuild it on their current device.
-            if tensor_bytes < min_tensor_bytes and current_value.device.type != "cuda":
+            if tensor_bytes < min_tensor_bytes and not is_accelerator_device(current_value.device):
                 return current_value
             if current_value.layout != torch.strided:
                 log.warning(f"Only strided tensors can be broadcast; skip layout={current_value.layout}.")
@@ -748,7 +750,7 @@ def broadcast_object_list_optimized(
 
     backend = dist.get_backend(group)
     if backend == dist.Backend.NCCL:
-        collective_device = device or torch.device("cuda", torch.cuda.current_device())
+        collective_device = device or accelerator_device(torch.accelerator.current_device_index())
     else:
         collective_device = torch.device("cpu")
     rebuilt_tensors: list[torch.Tensor] = []
@@ -770,8 +772,8 @@ def broadcast_object_list_optimized(
                     )
                 source_tensor = tensor_leaves[tensor_index]  # [*shape]
                 if (
-                    source_tensor.device.type == "cuda"
-                    and collective_device.type == "cuda"
+                    is_accelerator_device(source_tensor.device)
+                    and is_accelerator_device(collective_device)
                     and source_tensor.device != collective_device
                 ):
                     log.warning(

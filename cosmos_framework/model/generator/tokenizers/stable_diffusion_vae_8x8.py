@@ -9,6 +9,7 @@ from typing import Any
 import torch
 
 from cosmos_framework.model.generator.tokenizers.interface import VideoTokenizerInterface
+from cosmos_framework.utils.device import accelerator_device
 
 _DTYPE_BY_NAME: dict[str, torch.dtype] = {
     "float32": torch.float32,
@@ -31,8 +32,8 @@ def _resolve_dtype(dtype: str | torch.dtype) -> torch.dtype:
 
 def _default_device() -> torch.device:
     """Return the current CUDA device when available."""
-    if torch.cuda.is_available():
-        return torch.device("cuda", torch.cuda.current_device())
+    if torch.accelerator.is_available():
+        return accelerator_device(torch.accelerator.current_device_index())
     return torch.device("cpu")
 
 

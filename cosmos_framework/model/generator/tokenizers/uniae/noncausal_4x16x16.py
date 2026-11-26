@@ -25,9 +25,6 @@ from typing import Any
 
 import torch
 
-from cosmos_framework.utils import log
-from cosmos_framework.utils.distributed import broadcast_object, get_rank, sync_model_states
-from cosmos_framework.utils.easy_io import easy_io
 from cosmos_framework.model.generator.tokenizers.interface import VideoTokenizerInterface
 from cosmos_framework.model.generator.tokenizers.uniae.frame_math import (
     get_uniae_latent_num_frames,
@@ -35,8 +32,10 @@ from cosmos_framework.model.generator.tokenizers.uniae.frame_math import (
     get_uniae_pixel_num_frames,
     normalize_resolution_int_mapping,
 )
-from cosmos_framework.utils.generator.data_utils import get_vision_data_resolution
-from cosmos_framework.model.tokenizer.checkpoint_identity import extract_checkpoint_provenance, resolve_checkpoint_identity
+from cosmos_framework.model.tokenizer.checkpoint_identity import (
+    extract_checkpoint_provenance,
+    resolve_checkpoint_identity,
+)
 from cosmos_framework.model.tokenizer.checkpoint_io import (
     DCP_MODEL_LOAD_INFO_KEY,
     DCPModelLoadInfo,
@@ -46,6 +45,11 @@ from cosmos_framework.model.tokenizer.checkpoint_io import (
 from cosmos_framework.model.tokenizer.models.architecture import get_siglip2_so400m_common_arch
 from cosmos_framework.model.tokenizer.models.dense_runtime import DenseAutoencoderRuntime
 from cosmos_framework.model.tokenizer.models.sparse_autoencoder import AutoencoderKL
+from cosmos_framework.utils import log
+from cosmos_framework.utils.device import accelerator_device
+from cosmos_framework.utils.distributed import broadcast_object, get_rank, sync_model_states
+from cosmos_framework.utils.easy_io import easy_io
+from cosmos_framework.utils.generator.data_utils import get_vision_data_resolution
 
 _S3_ARCH = dict(
     **get_siglip2_so400m_common_arch(),
@@ -269,13 +273,14 @@ class UniAEVAE:
         latent_norm_path: str = "",
         require_latent_norm_checkpoint_match: bool = False,
         dtype: torch.dtype = torch.bfloat16,
-        device: str = "cuda",
+        device: str | torch.device | None = None,
         backend: str = "batched",
         pad_frames: int = 1,
         pixel_trim: bool = True,
         chunk_size: int | Mapping[str, int] = 16,
         encode_chunk_batch_size: int | Mapping[str, int] = 1,
     ) -> None:
+        device = accelerator_device() if device is None else device
         if torch.device(device).type == "meta":
             raise ValueError("UniAEVAE requires a concrete CPU or CUDA device; device='meta' is not supported.")
         chunk_size = normalize_resolution_int_mapping(chunk_size, name="chunk_size")

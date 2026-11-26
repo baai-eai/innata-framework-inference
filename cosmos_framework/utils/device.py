@@ -6,9 +6,30 @@ import gc
 import math
 import os
 from functools import wraps
+from typing import TYPE_CHECKING
 
 import pynvml
 from loguru import logger as logging
+
+if TYPE_CHECKING:
+    import torch
+
+
+def accelerator_device(index: int | None = None) -> "torch.device":
+    """Return the active accelerator, optionally with an explicit device index."""
+    import torch
+
+    device = torch.accelerator.current_accelerator()
+    if device is None:
+        raise RuntimeError("No PyTorch accelerator backend is available")
+    return torch.device(device.type, index) if index is not None else device
+
+
+def is_accelerator_device(device: "torch.device") -> bool:
+    import torch
+
+    accelerator = torch.accelerator.current_accelerator()
+    return accelerator is not None and device.type == accelerator.type
 
 
 def get_gpu_architecture() -> str:

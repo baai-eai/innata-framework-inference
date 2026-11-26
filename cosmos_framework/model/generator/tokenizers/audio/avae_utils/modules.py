@@ -16,7 +16,6 @@ from typing import Any, Literal, Optional
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
-from torch.cuda import amp
 from torch.nn.utils import weight_norm
 
 from . import activations
@@ -90,7 +89,7 @@ class LayerNorm(nn.Module):
         """
         dtype = tensor.dtype
         # fp32 to avoid numerical issues
-        with amp.autocast(enabled=True, dtype=torch.float32):
+        with torch.autocast(tensor.device.type, enabled=True, dtype=torch.float32):
             tensor = F.layer_norm(tensor, self.weight.shape, self.weight, self.bias, self.eps)
         return tensor.to(dtype)
 

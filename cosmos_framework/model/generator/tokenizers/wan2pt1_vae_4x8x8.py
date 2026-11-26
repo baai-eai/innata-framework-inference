@@ -9,10 +9,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 
+from cosmos_framework.model.generator.tokenizers.interface import VideoTokenizerInterface
 from cosmos_framework.utils import log
+from cosmos_framework.utils.device import accelerator_device
 from cosmos_framework.utils.distributed import get_rank, sync_model_states
 from cosmos_framework.utils.easy_io import easy_io
-from cosmos_framework.model.generator.tokenizers.interface import VideoTokenizerInterface
 
 # For sequential decoding, CACHE_T is the number of frames to cache.
 CACHE_T = 2
@@ -644,13 +645,13 @@ class WanVAE:
         vae_pth="",
         object_store_credential_path_pretrained: str = "",
         dtype=torch.bfloat16,
-        device="cuda",
+        device=None,
         is_amp=True,
         temporal_window: int = 4,
         use_channels_last_memory_format: bool = False,
     ):
         self.dtype = dtype
-        self.device = device
+        self.device = accelerator_device() if device is None else device
         self.temporal_window = temporal_window
 
         mean = [
@@ -707,7 +708,7 @@ class WanVAE:
             self.model = self.model.to(dtype=dtype)
             self.context = nullcontext()
         else:
-            self.context = torch.amp.autocast("cuda", dtype=dtype)
+            self.context = torch.amp.autocast(torch.device(self.device).type, dtype=dtype)
 
         if use_channels_last_memory_format:
             for _, module in self.model.encoder.named_modules():

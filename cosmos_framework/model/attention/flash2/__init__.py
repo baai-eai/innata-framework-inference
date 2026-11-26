@@ -30,7 +30,7 @@ def flash2_supported() -> bool:
 
     This check guards imports / dependencies on the Flash Attention package.
     """
-    if not torch.cuda.is_available():
+    if not torch.accelerator.is_available():
         log.debug("Flash Attention v2 is not supported because PyTorch did not detect CUDA runtime.")
         return False
 

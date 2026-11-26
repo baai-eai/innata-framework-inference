@@ -49,7 +49,7 @@ def convert_fp8_training(model: nn.Module, config: FP8TrainingConfig) -> dict:
             raise ValueError(f"FP8 training currently supports the Nano dense Qwen3VLTextMLP only: {name}")
         if module.in_features % 16 or module.out_features % 16:
             raise ValueError(f"FP8 training requires Linear dimensions divisible by 16: {name} {module.weight.shape}")
-    if not torch.cuda.is_available() or torch.cuda.get_device_capability()[0] < 9:
+    if not torch.accelerator.is_available() or torch.cuda.get_device_capability()[0] < 9:
         raise ValueError("FP8 training requires a Hopper or newer CUDA GPU")
 
     from torchao.float8 import Float8LinearConfig, convert_to_float8_training

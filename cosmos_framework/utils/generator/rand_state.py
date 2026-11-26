@@ -14,7 +14,7 @@ import torch
 def preserve_training_rng():
     """Isolate setup/probes from training RNGs on CPU and the current CUDA device."""
     python_state, numpy_state = random.getstate(), np.random.get_state()
-    devices = [torch.cuda.current_device()] if torch.cuda.is_available() else []
+    devices = [torch.accelerator.current_device_index()] if torch.accelerator.is_available() else []
     with torch.random.fork_rng(devices=devices):
         try:
             yield
@@ -32,7 +32,7 @@ def get_rand_state_dict() -> dict[str, torch.Tensor]:
 
     return {
         "torch": torch.get_rng_state(),
-        "torch_cuda": torch.cuda.get_rng_state(),
+        "torch_cuda": torch.get_device_module().get_rng_state(),
         "numpy_packed_len": torch.tensor(numpy_packed_len, dtype=torch.long),  # []
         "numpy_packed_bytes": torch.frombuffer(numpy_packed_bytes, dtype=torch.uint8),  # [MAX_PACKED_LEN]
         "random_packed_len": torch.tensor(random_packed_len, dtype=torch.long),  # []
@@ -45,7 +45,7 @@ def set_rand_state_dict(state_dict: dict[str, torch.Tensor]) -> None:
     Set the random state dictionary. used to restore the random state from a checkpoint.
     """
     torch.set_rng_state(state_dict["torch"])
-    torch.cuda.set_rng_state(state_dict["torch_cuda"])
+    torch.get_device_module().set_rng_state(state_dict["torch_cuda"])
     np.random.set_state(
         unpack_numpy_state(state_dict["numpy_packed_len"].item(), bytes(state_dict["numpy_packed_bytes"].tolist()))
     )
@@ -93,7 +93,7 @@ def unpack_random_state(packed_len: int, packed_bytes: bytearray) -> tuple[int, 
 if __name__ == "__main__":
     print("--- Initializing Seeds ---")
     torch.manual_seed(42)
-    torch.cuda.manual_seed_all(42)
+    torch.get_device_module().manual_seed_all(42)
     np.random.seed(42)
     random.seed(42)
 
